@@ -9,15 +9,26 @@ wheels/
 
 # Virtual environments
 .venv
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+hackathon_env/
 *.pth
+*.egg
 .ruff_cache
 wandb/
 logs/
 .vscode
 
+# Python version files
 .python-version
-pyproject.toml
+
+# Package management
 uv.lock
+pip-log.txt
+pip-delete-this-directory.txt
 
 .DS_Store
 

@@ -1,0 +1,159 @@
+{
+  "profile": {
+    "id": "zhou-gui",
+    "firstName": "Zhou",
+    "lastName": "Gui",
+    "headline": "Research Assistant | Digital Tech Fellow at FAU Digital Tech Academy",
+    "location": "Erlangen, Bavaria, Germany",
+    "followersCount": 294,
+    "connectionsCount": 287,
+    "occupation": "Research Assistant at University of Erlangen-Nuremberg",
+    "education": [
+      {
+        "institution": "FAU Erlangen-Nürnberg",
+        "degree": "Master of Science",
+        "fieldOfStudy": "Information and Communication Technology",
+        "years": "2017 - 2019"
+      },
+      {
+        "institution": "Nanjing University of Posts and Telecommunications",
+        "degree": "Bachelor of Science",
+        "fieldOfStudy": "Radio and Broadcasting Technology",
+        "years": "2012 - 2016"
+      }
+    ],
+    "certifications": [
+      {
+        "name": "Professional Scrum Master I",
+        "issuer": "Scrum.org",
+        "dateIssued": "2024-03"
+      }
+    ],
+    "linkedinUrl": "https://www.linkedin.com/in/zhou-gui"
+  },
+  "posts": [
+    {
+      "id": "post-1",
+      "author": {
+        "id": "zhou-gui",
+        "name": "Zhou Gui",
+        "headline": "Research Assistant | Digital Tech Fellow at FAU Digital Tech Academy"
+      },
+      "content": {
+        "text": "Thrilled to share that our paper *'Efficient Deep Metric Learning for Cross-Domain Image Retrieval'* has been accepted at CVPR 2025! 🎉\n\nThis project started as part of my research at FAU, focusing on bridging domain gaps in image embeddings using contrastive adaptation layers. Huge thanks to my amazing colleagues at the Chair of Multimedia Communications and to my supervisor Prof. Andreas Maier for his guidance.\n\n#CVPR2025 #DeepLearning #MetricLearning #ImageRetrieval",
+        "media": [
+          {
+            "type": "image",
+            "altText": "Poster presentation at CVPR 2025",
+            "url": "https://example.com/images/cvpr2025_poster.jpg"
+          }
+        ]
+      },
+      "timestamp": "2025-06-10T08:00:00Z",
+      "visibility": "PUBLIC",
+      "engagement": {
+        "reactions": {
+          "like": 87,
+          "celebrate": 42,
+          "love": 11
+        },
+        "totalReactions": 140,
+        "commentsCount": 9,
+        "sharesCount": 3
+      },
+      "linkedEntities": [
+        {
+          "type": "organization",
+          "name": "University of Erlangen-Nuremberg",
+          "role": "Research institution"
+        },
+        {
+          "type": "conference",
+          "name": "CVPR 2025",
+          "role": "Publication venue"
+        }
+      ]
+    },
+    {
+      "id": "post-2",
+      "author": {
+        "id": "zhou-gui",
+        "name": "Zhou Gui"
+      },
+      "content": {
+        "text": "Excited to have completed my *Professional Scrum Master I* certification! 🧠✨\n\nAs research increasingly involves cross-functional collaboration, I’ve found agile principles invaluable in managing student projects and interdisciplinary work at FAU. Looking forward to applying Scrum methods to accelerate our digital tech initiatives.\n\n#Scrum #Agile #Leadership #Research",
+        "media": [
+          {
+            "type": "image",
+            "altText": "Scrum.org certification badge",
+            "url": "https://example.com/images/psm1_badge.png"
+          }
+        ]
+      },
+      "timestamp": "2024-03-22T15:30:00Z",
+      "visibility": "PUBLIC",
+      "engagement": {
+        "reactions": {
+          "like": 52,
+          "celebrate": 27
+        },
+        "totalReactions": 79,
+        "commentsCount": 5,
+        "sharesCount": 0
+      },
+      "linkedEntities": [
+        {
+          "type": "organization",
+          "name": "Scrum.org",
+          "role": "Certification authority"
+        },
+        {
+          "type": "organization",
+          "name": "FAU Digital Tech Academy",
+          "role": "Employer"
+        }
+      ]
+    },
+    {
+      "id": "post-3",
+      "author": {
+        "id": "zhou-gui",
+        "name": "Zhou Gui"
+      },
+      "content": {
+        "text": "Honored to be recognized as a *Top Digital Tech Fellow* at the FAU Digital Tech Academy for 2025! 🌟\n\nOver the past months, I’ve mentored interdisciplinary teams developing sustainable AI systems for urban infrastructure. It’s inspiring to see students applying deep learning for environmental monitoring and mobility optimization.\n\nThank you to the FAU DTA team for fostering innovation across disciplines. Let’s keep pushing the boundaries of what AI can do for society! 💡\n\n#FAU #DigitalTech #AIForGood #Mentorship",
+        "media": [
+          {
+            "type": "image",
+            "altText": "Award ceremony at FAU Digital Tech Academy",
+            "url": "https://example.com/images/fau_dta_award.jpg"
+          }
+        ]
+      },
+      "timestamp": "2025-02-14T17:45:00Z",
+      "visibility": "PUBLIC",
+      "engagement": {
+        "reactions": {
+          "like": 96,
+          "celebrate": 58,
+          "love": 22
+        },
+        "totalReactions": 176,
+        "commentsCount": 12,
+        "sharesCount": 4
+      },
+      "linkedEntities": [
+        {
+          "type": "organization",
+          "name": "FAU Digital Tech Academy",
+          "role": "Awarding body"
+        },
+        {
+          "type": "topic",
+          "name": "AI for Social Good",
+          "role": "Research focus"
+        }
+      ]
+    }
+  ]
+}

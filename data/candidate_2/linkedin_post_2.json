@@ -1,0 +1,105 @@
+{
+  "profile": {
+    "id": "aziz-shabou",
+    "firstName": "Aziz",
+    "lastName": "Shabou",
+    "headline": "CS @ TUM | AI & Cloud enthusiast",
+    "location": null,
+    "followersCount": 360,
+    "profilePicture": null,
+    "occupation": "Computer Science student at Technical University of Munich (TUM)",
+    "about": "AI and Cloud enthusiast passionate about technology, collaboration, and continuous learning.",
+    "linkedinUrl": "https://www.linkedin.com/in/aziz-shabou",
+    "connectionsDegree": "1st"
+  },
+  "posts": [
+    {
+      "id": "post-1",
+      "author": {
+        "id": "aziz-shabou",
+        "name": "Aziz Shabou",
+        "headline": "CS @ TUM | AI & Cloud enthusiast"
+      },
+      "content": {
+        "text": "Advisor - A project that has been a milestone in my journey—one that pushed me to grow both personally and professionally. Leading our team together with Nickolaj and Atuf Eren showed me what true collaboration, resilience, and focus under pressure look like.\n\nI’m especially grateful to Manfred Lang and Philipp Rubner, whose guidance in project management, moderation, and stress handling left a lasting impact.\n\nMore than the event itself, what mattered most was the spirit of the team: supporting each other, growing together, and turning challenges into lessons. An experience I’ll always carry forward.",
+        "media": [
+          {
+            "type": "image",
+            "altText": null,
+            "url": null
+          },
+          {
+            "type": "image",
+            "altText": null,
+            "url": null
+          }
+        ]
+      },
+      "timestamp": "2025-10-08T00:00:00Z",
+      "visibility": "PUBLIC",
+      "engagement": {
+        "reactions": {
+          "like": 1,
+          "celebrate": 1,
+          "love": 1
+        },
+        "totalReactions": 26,
+        "commentsCount": 1,
+        "sharesCount": 0
+      },
+      "linkedEntities": [
+        {
+          "type": "person",
+          "name": "Nickolaj",
+          "role": "Team co-lead"
+        },
+        {
+          "type": "person",
+          "name": "Atuf Eren",
+          "role": "Team co-lead"
+        },
+        {
+          "type": "person",
+          "name": "Manfred Lang",
+          "role": "Advisor / Mentor"
+        },
+        {
+          "type": "person",
+          "name": "Philipp Rubner",
+          "role": "Advisor / Mentor"
+        }
+      ]
+    },
+    {
+      "id": "post-2",
+      "author": {
+        "id": "aziz-shabou",
+        "name": "Aziz Shabou",
+        "headline": "CS @ TUM | AI & Cloud enthusiast"
+      },
+      "content": {
+        "text": "Happy to announce that I started a new Position as Working Student at Syneco Trading GmbH !",
+        "media": []
+      },
+      "timestamp": "2025-09-08T00:00:00Z",
+      "visibility": "PUBLIC",
+      "engagement": {
+        "reactions": {
+          "like": null,
+          "celebrate": null,
+          "love": null
+        },
+        "totalReactions": null,
+        "commentsCount": null,
+        "sharesCount": null
+      },
+      "linkedEntities": [
+        {
+          "type": "organization",
+          "name": "Syneco Trading GmbH",
+          "role": "Employer"
+        }
+      ]
+    }
+  ]
+}

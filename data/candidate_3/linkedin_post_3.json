@@ -1,0 +1,233 @@
+{
+    "profile": {
+      "id": "vinicius-agreste-martines-dos-santos",
+      "localizedFirstName": "Vinicius",
+      "localizedLastName": "Agreste Martines dos Santos",
+      "headline": "Information Systems M.Sc. Student @TUM",
+      "summary": "Master’s student in Information Systems at the Technical University of Munich (TUM). Experienced in AI applications, data analysis, and enterprise software development through collaborations with SAP, BMW, and Allianz. Active in TUM.ai and hackathon communities.",
+      "followerCount": 622,
+      "profilePicture": null,
+      "location": {
+        "country": "Germany",
+        "city": "Munich"
+      },
+      "currentPositions": [
+        {
+          "title": "Information Systems M.Sc. Student",
+          "organization": "Technical University of Munich (TUM)",
+          "type": "Education",
+          "startDate": null,
+          "endDate": null
+        }
+      ],
+      "pastPositions": [
+        {
+          "title": "Working Student, Data Analyst / Data Engineer",
+          "organization": "Allianz Kunde und Markt GmbH",
+          "startDate": "2023-05",
+          "endDate": null
+        },
+        {
+          "title": "Working Student, Process and IT-Tools Development",
+          "organization": "BMW Group",
+          "startDate": "2021-04",
+          "endDate": "2022-04"
+        }
+      ],
+      "organizations": [
+        {
+          "name": "TUM.ai",
+          "role": "Member / Organizer",
+          "description": "Germany’s largest student initiative around AI, organizing events and makeathons on applied AI."
+        }
+      ],
+      "skills": [
+        "Artificial Intelligence",
+        "Machine Learning",
+        "Data Analysis",
+        "Enterprise Software Engineering",
+        "Python",
+        "SAP BTP",
+        "LangGraph",
+        "Supply Chain AI",
+        "Hackathons"
+      ]
+    },
+    "posts": [
+      {
+        "id": "post-001",
+        "author": "vinicius-agreste-martines-dos-santos",
+        "createdAt": "2025-09-01T00:00:00Z",
+        "visibility": "PUBLIC",
+        "content": {
+          "text": "Over the past semester, I had the chance to work with SAP CTO R&I Munich as part of Technical University of Munich's 'Enterprise Software Engineering' course with SAP UCC Munich. We developed a multi-agent AI system using LangGraph to support human-AI decision-making in supply chains, integrating SAP S/4HANA and SAP BTP.",
+          "media": [],
+          "hashtags": ["#LangGraph", "#S4HANA", "#BTP"]
+        },
+        "mentions": [
+          {"name": "Katie L.", "type": "Person"},
+          {"name": "Jonas Gatterer", "type": "Person"},
+          {"name": "Borys Levkovskyi", "type": "Person"},
+          {"name": "Lennart Adenaw", "type": "Person"},
+          {"name": "SAP", "type": "Organization"},
+          {"name": "Technical University of Munich", "type": "Organization"}
+        ],
+        "engagement": {
+          "likes": 21,
+          "comments": 4,
+          "reposts": 0
+        },
+        "source": "LinkedIn Web"
+      },
+      {
+        "id": "post-002",
+        "author": "vinicius-agreste-martines-dos-santos",
+        "createdAt": "2025-06-01T00:00:00Z",
+        "visibility": "PUBLIC",
+        "content": {
+          "text": "Participated in #CDTMHacks, a hackathon by CDTM and Celonis — my first ever! We optimized patient data intake using AI-based OCR and vector embeddings to assist doctors in retrieving relevant patient documents efficiently. It was an incredible experience of collaboration, learning, and sleep deprivation — and I’ll definitely do it again!",
+          "media": [],
+          "hashtags": ["#CDTMHacks", "#AI", "#Hackathon", "#Celonis"]
+        },
+        "mentions": [
+          {"name": "Center for Digital Technology and Management (CDTM)", "type": "Organization"},
+          {"name": "Celonis", "type": "Organization"},
+          {"name": "Nico Trummer", "type": "Person"},
+          {"name": "Georg Delp", "type": "Person"},
+          {"name": "Johannes Trahasch", "type": "Person"}
+        ],
+        "engagement": {
+          "likes": 85,
+          "comments": 7,
+          "reposts": 2
+        },
+        "source": "LinkedIn Web"
+      },
+      {
+        "id": "post-003",
+        "author": "vinicius-agreste-martines-dos-santos",
+        "createdAt": "2024-11-01T00:00:00Z",
+        "visibility": "PUBLIC",
+        "content": {
+          "text": "I’m happy to share that I’m starting a new Data Analyst/Data Engineer - Working Student position at Allianz Kunde und Markt GmbH!",
+          "media": [],
+          "hashtags": []
+        },
+        "mentions": [
+          {"name": "Allianz Kunde und Markt GmbH", "type": "Organization"}
+        ],
+        "engagement": {
+          "likes": 74,
+          "comments": 10,
+          "reposts": 0
+        },
+        "source": "LinkedIn Web"
+      },
+      {
+        "id": "post-004",
+        "author": "vinicius-agreste-martines-dos-santos",
+        "createdAt": "2023-11-01T00:00:00Z",
+        "visibility": "PUBLIC",
+        "content": {
+          "text": "My one-year working student experience at BMW Group has come to an end. It’s been an incredible journey of growth and learning in data management, automation, and process innovation. Thank you to my team and supervisor for this amazing experience!",
+          "media": [],
+          "hashtags": ["#BMWGroup", "#AutomotiveIndustry", "#ProfessionalGrowth"]
+        },
+        "mentions": [
+          {"name": "BMW Group", "type": "Organization"},
+          {"name": "Markus Nell", "type": "Person"},
+          {"name": "Kunxiong Ling", "type": "Person"},
+          {"name": "Lei Meusel", "type": "Person"}
+        ],
+        "engagement": {
+          "likes": 71,
+          "comments": 1,
+          "reposts": 0
+        },
+        "source": "LinkedIn Web"
+      },
+      {
+        "id": "post-005",
+        "author": "vinicius-agreste-martines-dos-santos",
+        "createdAt": "2022-09-15T00:00:00Z",
+        "visibility": "PUBLIC",
+        "content": {
+          "text": "TUM.ai is organizing the Makeathon — a 48-hour hybrid challenge around AI for Global Impact! Participants can tackle real-world problems in AI for Healthcare, Environment, and Globalization. Join us and apply now!",
+          "media": [],
+          "hashtags": ["#hackathon", "#AI", "#TUM", "#Makeathon"]
+        },
+        "mentions": [
+          {"name": "TUM.ai", "type": "Organization"}
+        ],
+        "engagement": {
+          "likes": 27,
+          "comments": 0,
+          "reposts": 0
+        },
+        "source": "LinkedIn Web"
+      },
+      {
+        "id": "post-006",
+        "author": "vinicius-agreste-martines-dos-santos",
+        "createdAt": "2022-04-01T00:00:00Z",
+        "visibility": "PUBLIC",
+        "content": {
+          "text": "I’m happy to share that I’m starting a new position as Working Student in Process and IT-Tools Development at BMW Group! Excited to face this new challenge!",
+          "media": [],
+          "hashtags": []
+        },
+        "mentions": [
+          {"name": "BMW Group", "type": "Organization"}
+        ],
+        "engagement": {
+          "likes": 54,
+          "comments": 5,
+          "reposts": 0
+        },
+        "source": "LinkedIn Web"
+      },
+      {
+        "id": "post-007",
+        "author": "vinicius-agreste-martines-dos-santos",
+        "createdAt": "2022-03-01T00:00:00Z",
+        "visibility": "PUBLIC",
+        "content": {
+          "text": "So proud to be part of such an awesome team! We just finished TUM.ai’s first-ever AI Bootcamp — an amazing 3-day learning experience on computer vision, NLP, and AI project management.",
+          "media": [],
+          "hashtags": ["#AI", "#MLOps", "#NLP", "#Education", "#Startup"]
+        },
+        "mentions": [
+          {"name": "TUM.ai", "type": "Organization"},
+          {"name": "Alexander Machado", "type": "Person"},
+          {"name": "appliedAI Initiative", "type": "Organization"}
+        ],
+        "engagement": {
+          "likes": 17,
+          "comments": 0,
+          "reposts": 0
+        },
+        "source": "LinkedIn Web"
+      },
+      {
+        "id": "post-008",
+        "author": "vinicius-agreste-martines-dos-santos",
+        "createdAt": "2022-01-01T00:00:00Z",
+        "visibility": "PUBLIC",
+        "content": {
+          "text": "🚀 The TUM.ai Makeathon is back! Join our 48-hour challenge to apply AI to real-world social good projects, meet industry experts, and develop impactful prototypes.",
+          "media": [],
+          "hashtags": ["#AI4SocialGood", "#Makeathon", "#Startup", "#Networking"]
+        },
+        "mentions": [
+          {"name": "TUM.ai", "type": "Organization"}
+        ],
+        "engagement": {
+          "likes": 0,
+          "comments": 0,
+          "reposts": 0
+        },
+        "source": "LinkedIn Web"
+      }
+    ]
+  }
+  
