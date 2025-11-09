@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run job analysis, candidate evaluation, and feedback generation."""
+"""Run job analysis, candidate evaluation, and single-candidate feedback generation."""
 
 import argparse
 import sys
@@ -13,19 +13,23 @@ if str(SRC_PATH) not in sys.path:
 
 from job_requirements_analyzer import analyze_job_from_url, get_project_root
 from candidate_evaluation_runner import run_candidate_evaluation
-from candidate_feedback_generator import generate_feedback_for_rejected_candidates
-from question_generation_runner import run_question_generation
 
 
 def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Run job analysis, candidate ranking, and feedback generation"
+        description="Run job analysis, candidate ranking, and single-candidate feedback generation"
     )
     parser.add_argument("job_url", help="URL of the job posting to analyze")
     parser.add_argument(
         "--company",
         required=True,
         help="Company name associated with the job posting",
+    )
+    parser.add_argument(
+        "--candidate-id",
+        type=int,
+        required=True,
+        help="Candidate ID to generate feedback for",
     )
     parser.add_argument(
         "--n",
@@ -37,12 +41,6 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
         "--output-dir",
         default="data",
         help="Directory where outputs (requirements, evaluations, feedback) are stored",
-    )
-    parser.add_argument(
-        "--top-n",
-        type=int,
-        default=1,
-        help="Number of top-ranked candidates to exclude from feedback",
     )
     parser.add_argument(
         "--candidates",
@@ -88,68 +86,40 @@ def main(argv: Optional[List[str]] = None) -> None:
         url=args.job_url,
         company=args.company,
         n=args.n,
-        output_file=str(job_requirements_path.relative_to(project_root)),
+        output_file=_as_relative(job_requirements_path, project_root),
         project_root=project_root,
     )
     saved_requirements = job_result.get("saved_path")
     if saved_requirements:
         job_requirements_path = Path(saved_requirements)
         if not job_requirements_path.is_absolute():
-            job_requirements_path = project_root / job_requirements_path
+            job_requirements_path = (project_root / job_requirements_path).resolve()
 
     print("\n" + "=" * 80)
     print("AGENT B: Candidate Evaluation")
     print("=" * 80)
     evaluation_result = run_candidate_evaluation(
-        job_file=str(job_requirements_path.relative_to(project_root)),
+        job_file=_as_relative(job_requirements_path, project_root),
         candidate_ids=args.candidates,
-        output_dir=str(output_dir.relative_to(project_root)),
+        output_dir=_as_relative(output_dir, project_root),
         show_details=not args.hide_details,
         project_root=project_root,
     )
 
+    eval_file = Path(evaluation_result["output_file"])
+    if not eval_file.is_absolute():
+        eval_file = (project_root / eval_file).resolve()
+    candidate_evaluations_path = eval_file
+
     print("\n" + "=" * 80)
     print("AGENT C: Feedback Generation")
     print("=" * 80)
-    eval_file = Path(evaluation_result["output_file"])
-    if not eval_file.is_absolute():
-        eval_file = project_root / eval_file
-    candidate_evaluations_path = eval_file
-
-    generate_feedback_for_rejected_candidates(
-        top_n=args.top_n,
-        evaluations_file=eval_file,
+    feedback = generate_feedback_for_candidate(
+        candidate_id=args.candidate_id,
+        evaluations_file=candidate_evaluations_path,
         requirements_file=job_requirements_path,
-        output_summary_file=feedback_summary_path,
+        output_file=feedback_summary_path,
         feedback_dir=feedback_dir,
-        project_root=project_root,
-    )
-
-    # Agent D: Interview Question Generation (optional)
-    interview_questions_path = output_dir / "interview_questions.json"
-    if not args.skip_questions:
-        print("\n" + "=" * 80)
-        print("AGENT D: Interview Question Generation")
-        print("=" * 80)
-        question_result = run_question_generation(
-            top_k=args.top_k,
-            evaluations_file=str(candidate_evaluations_path.relative_to(project_root)),
-            job_requirements_file=str(job_requirements_path.relative_to(project_root)),
-            output_file=str(interview_questions_path.relative_to(project_root)),
-            project_root=project_root,
-        )
-
-    print("\n" + "=" * 80)
-    print("WORKFLOW COMPLETE")
-    print("=" * 80)
-    print(f"Job requirements saved to: {job_requirements_path}")
-    print(f"Candidate evaluations saved to: {candidate_evaluations_path}")
-    print(f"Feedback summary saved to: {feedback_summary_path}")
-    print(f"Individual feedback stored in: {feedback_dir}")
-    if not args.skip_questions:
-        print(f"Interview questions saved to: {interview_questions_path}")
-    print("=" * 80)
-
 
 if __name__ == "__main__":
     main()

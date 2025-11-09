@@ -512,114 +512,9 @@ def format_feedback_as_text(feedback: CandidateFeedback, candidate_id: int = Non
     return "\n".join(lines)
 
 
-# -------------------------------
-# 8️⃣ Generate feedback for all rejected candidates
-# -------------------------------
-
-
-def generate_feedback_for_rejected_candidates(
-    top_n: int = 1,
-    evaluations_file: Path = None,
-    requirements_file: Path = None,
-    output_summary_file: Path = None,
-    feedback_dir: Path = None,
-    project_root: Path = None,
-) -> Dict[int, CandidateFeedback]:
-    """Generate feedback for every candidate except the top N."""
-    if project_root is None:
-        project_root = get_project_root()
-
-    if evaluations_file is None:
-        evaluations_file = project_root / "data" / "candidate_evaluations.json"
-    if requirements_file is None:
-        requirements_file = project_root / "data" / "job_requirements.json"
-    if output_summary_file is None:
-        output_summary_file = project_root / "data" / "candidate_feedback.json"
-    if feedback_dir is None:
-        feedback_dir = project_root / "data" / "feedback"
-
-    feedback_dir.mkdir(parents=True, exist_ok=True)
-
-    with open(evaluations_file, "r") as f:
-        evaluations_data = json.load(f)
-
-    with open(requirements_file, "r") as f:
-        job_requirements = json.load(f)
-
-    candidates = evaluations_data.get("candidates", {})
-    sorted_candidates = sorted(
-        candidates.items(),
-        key=lambda item: item[1].get("affinity_score", 0.0),
-        reverse=True,
-    )
-
-    rejected = sorted_candidates[top_n:]
-    feedback_results: Dict[int, CandidateFeedback] = {}
-
-    for rank_offset, (candidate_key, eval_data) in enumerate(rejected, start=1):
-        candidate_id = int(candidate_key)
-        print(
-            f"Generating feedback for Candidate {candidate_id} "
-            f"(Rank #{top_n + rank_offset}, Score: {eval_data.get('affinity_score', 0.0):.3f})"
-        )
-
-        feedback = generate_candidate_feedback(
-            candidate_id=candidate_id,
-            evaluation_data=eval_data,
-            job_requirements=job_requirements,
-            project_root=project_root,
-        )
-
-        feedback_results[candidate_id] = feedback
-
-        individual_path = feedback_dir / f"candidate_{candidate_id}_feedback.json"
-        with open(individual_path, "w") as f:
-            json.dump(feedback.model_dump(), f, indent=2)
-
-    summary_payload = {
-        "metadata": {
-            "generation_date": datetime.now().isoformat(),
-            "total_candidates": len(sorted_candidates),
-            "top_selected": top_n,
-            "feedback_generated_for": len(feedback_results),
-            "job_role": job_requirements.get("company_name", "Unknown"),
-        },
-        "feedback": {
-            str(cid): fb.model_dump() for cid, fb in feedback_results.items()
-        },
-    }
-
-    with open(output_summary_file, "w") as f:
-        json.dump(summary_payload, f, indent=2)
-
-    print(
-        f"Feedback generated for {len(feedback_results)} candidates. "
-        f"Summary saved to {output_summary_file}."
-    )
-
-    return feedback_results
-
-
-# -------------------------------
-# 9️⃣ CLI entry point
-# -------------------------------
-
-
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Generate candidate feedback"
-    )
-    parser.add_argument(
-        "--candidate-id",
-        type=int,
-        help="Generate feedback for a single candidate (overrides --top-n mode)",
-    )
-    parser.add_argument(
-        "--top-n",
-        type=int,
-        default=1,
-        help="Number of top-ranked candidates to exclude when generating batch feedback",
-    )
+    parser = argparse.ArgumentParser(description="Generate feedback for a single candidate")
+    parser.add_argument("candidate_id", type=int, help="Candidate ID")
     parser.add_argument("--evaluations-file", default=None)
     parser.add_argument("--requirements-file", default=None)
     parser.add_argument("--output-summary", default=None)
@@ -627,24 +522,15 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if args.candidate_id is not None:
-        feedback = generate_feedback_for_candidate(
-            candidate_id=args.candidate_id,
-            evaluations_file=Path(args.evaluations_file) if args.evaluations_file else None,
-            requirements_file=Path(args.requirements_file) if args.requirements_file else None,
-            output_file=Path(args.output_summary) if args.output_summary else None,
-            feedback_dir=Path(args.feedback_dir) if args.feedback_dir else None,
-        )
+    feedback = generate_feedback_for_candidate(
+        candidate_id=args.candidate_id,
+        evaluations_file=Path(args.evaluations_file) if args.evaluations_file else None,
+        requirements_file=Path(args.requirements_file) if args.requirements_file else None,
+        output_file=Path(args.output_summary) if args.output_summary else None,
+        feedback_dir=Path(args.feedback_dir) if args.feedback_dir else None,
+    )
 
-        print("\n" + "=" * 80)
-        print("FORMATTED FEEDBACK REPORT")
-        print("=" * 80 + "\n")
-        print(format_feedback_as_text(feedback, args.candidate_id))
-    else:
-        generate_feedback_for_rejected_candidates(
-            top_n=args.top_n,
-            evaluations_file=Path(args.evaluations_file) if args.evaluations_file else None,
-            requirements_file=Path(args.requirements_file) if args.requirements_file else None,
-            output_summary_file=Path(args.output_summary) if args.output_summary else None,
-            feedback_dir=Path(args.feedback_dir) if args.feedback_dir else None,
-        )
+    print("\n" + "=" * 80)
+    print("FORMATTED FEEDBACK REPORT")
+    print("=" * 80 + "\n")
+    print(format_feedback_as_text(feedback, args.candidate_id))
