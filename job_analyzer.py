@@ -344,16 +344,33 @@ def main():
 
     # Check if URL provided as command line argument
     if len(sys.argv) > 1:
-        url = sys.argv[1]
-        print(f"Mode: URL Analysis")
-        print()
+        arg = sys.argv[1]
 
-        try:
-            result = analyze_job_from_url(url)
-        except ValueError as e:
-            print(f"Error: {e}")
+        # Validate that the argument is actually a URL
+        parsed = urlparse(arg)
+        if parsed.scheme in ('http', 'https') and parsed.netloc:
+            # Valid URL provided
+            print(f"Mode: URL Analysis")
             print()
-            print("Please provide a valid job posting URL")
+
+            try:
+                result = analyze_job_from_url(arg)
+            except ValueError as e:
+                print(f"Error: {e}")
+                print()
+                print("Please provide a valid job posting URL")
+                sys.exit(1)
+        else:
+            # Not a valid URL, show error
+            print(f"Error: Invalid URL format: {arg}")
+            print()
+            print("Please provide a valid URL starting with http:// or https://")
+            print()
+            print("Usage:")
+            print("  python job_analyzer.py <job_posting_url>")
+            print()
+            print("Example:")
+            print("  python job_analyzer.py https://example.com/jobs/senior-engineer")
             sys.exit(1)
     else:
         # Use example job description for testing
