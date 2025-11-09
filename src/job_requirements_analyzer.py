@@ -1,23 +1,28 @@
 #!/usr/bin/env python3
 """
-Job Feature Weight Analyzer
-Analyzes job descriptions and generates candidate evaluation weights.
-Technical Mastery is always fixed at 1.0, others are dynamic based on job context.
+Job Feature Extraction API
+--------------------------
+FastAPI service that:
+  • scrapes a job description from a URL
+  • uses an LLM to extract top N technical + N behavioral features
+  • assigns importance weights
+  • returns a structured JSON response
 
-Using Google Vertex AI with GCP credits.
+Run with:
+    uvicorn job_api:app --reload
 """
 
 import os
-import sys
-import json
 import re
-from typing import Dict, List, Optional
+import json
 from pathlib import Path
-from dotenv import load_dotenv
-from google import genai
+from typing import Dict, List, Optional
+from urllib.parse import urlparse
+
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse
+from dotenv import load_dotenv
+from google import genai
 
 # Load environment variables
 load_dotenv()
@@ -35,20 +40,12 @@ client = genai.Client(
     project=PROJECT_ID,
     location=LOCATION
 )
+# app = FastAPI(title="Job Feature Extraction API")
 
-# The 10 evaluation dimensions
-FEATURES = [
-    "Technical Mastery",
-    "Discipline & Consistency",
-    "Execution Reliability",
-    "Cultural Agreeableness",
-    "Creative Divergence",
-    "Leadership Initiative",
-    "Resilience & Grit",
-    "Communication Clarity",
-    "Team Elevation",
-    "Growth Hunger"
-]
+
+# ---------------------------------------------------------------------------
+# SCRAPER
+# ---------------------------------------------------------------------------
 
 
 def get_project_root() -> Path:
@@ -138,278 +135,139 @@ def scrape_job_description(url: str) -> str:
         raise ValueError(f"Error scraping page: {e}")
 
 
-def fetch_company_culture(company_name: str) -> str:
+
+# ---------------------------------------------------------------------------
+# LLM-BASED FEATURE EXTRACTION
+# ---------------------------------------------------------------------------
+
+def extract_features_with_weights(job_description: str, company: str, n: int = 5) -> Dict:
+    """Extract N technical + N behavioral features and assign weights using LLM."""
+    prompt = f"""
+    You are an expert recruiter and organizational psychologist.
+
+    Analyze the following job description and the company context.
+
+    Extract:
+    - The top {n} *technical* skills or competencies (languages, frameworks, tools, domain knowledge).
+    - The top {n} *behavioral or psychological* characteristics (soft skills, personality traits, mindset).
+
+    Then assign an *importance weight* between 0.0 and 1.0 for each feature, representing how critical it is for success in this role.
+
+    Return ONLY a valid JSON object with the following structure:
+
+    {{
+    "company": "{company}",
+    "job_description": "<<FULL JOB TEXT>>",
+    "features": ["Python", "Team Collaboration", ...],
+    "weights": [1.0, 0.8, ...],
+    "types": ["technical", "behavioral", ...]
+    }}
+
+    The arrays must be of the same length.
+    Do not include any text, comments, or explanations outside the JSON object.
+
+    Job Description:
+    {job_description}
     """
-    Fetch company culture information using LLM knowledge.
-    
-    Args:
-        company_name: Name of the company
-        
-    Returns:
-        Company culture information as a string
-    """
-    if not company_name or not company_name.strip():
-        return ""
-    
-    prompt = f"""Based on your knowledge, provide a brief overview of the company culture and work environment for {company_name}.
-
-Focus on:
-- Work culture and values
-- Team collaboration style
-- Innovation and creativity emphasis
-- Leadership expectations
-- Work-life balance approach
-- Communication style
-- Growth and development opportunities
-
-Return a concise paragraph (3-5 sentences) describing the company culture. If you don't have specific information about this company, provide general observations based on the company name and industry if possible, or return "No specific culture information available."
-"""
-
     try:
         response = client.models.generate_content(
             model="gemini-2.0-flash-exp",
-            contents=prompt
+            contents=prompt,
         )
-        
-        culture_info = response.text.strip()
-        return culture_info
+        text = re.sub(r"^```(json)?|```$", "", response.text.strip()).strip()
+        result = json.loads(text)
+        return result
     except Exception as e:
-        print(f"Warning: Could not fetch company culture information: {e}")
-        return ""
+        raise RuntimeError(f"LLM error: {e}")
 
 
-def extract_tech_skills(job_description: str) -> List[str]:
+# ---------------------------------------------------------------------------
+# GLOBAL FUNCTION FOR DIRECT USE
+# ---------------------------------------------------------------------------
+
+def analyze_job_from_url(
+    url: str,
+    company: str,
+    n: int = 5,
+    output_file: Optional[str] = None,
+    project_root: Optional[Path] = None,
+) -> Dict:
     """
-    Extract technical skills and technologies mentioned in job description.
-
-    Args:
-        job_description: Raw job description text
-
-    Returns:
-        List of technical skills/technologies
-    """
-    prompt = f"""Analyze the following job description and extract all technical skills (technologies, programming languages, frameworks, tools, and other technical competencies) 
-    as well as soft skills relevant for performing well in this role.
-
-    Return only a JSON array of strings. Do not include any additional text, explanation, or formatting.
-
-    Example output:
-    ["Adaptability", "Creativity", "Python", "Machine Learning", "TensorFlow", "AWS", "SQL"]
-
-Job Description:
-{job_description}
-"""
-
-    try:
-        response = client.models.generate_content(
-            model="gemini-2.0-flash-exp",
-            contents=prompt
-        )
-
-        # Parse JSON from response
-        result = response.text.strip()
-        if result.startswith('```json'):
-            result = result.split('```json')[1].split('```')[0].strip()
-        elif result.startswith('```'):
-            result = result.split('```')[1].split('```')[0].strip()
-
-        skills = json.loads(result)
-        return skills if isinstance(skills, list) else []
-    except Exception as e:
-        print(f"Error extracting skills: {e}")
-        return []
-
-
-def generate_feature_weights(job_description: str, tech_skills: List[str], 
-                              company_culture: str = "") -> Dict[str, float]:
-    """
-    Generate weights for all 10 candidate evaluation features.
-    Technical Mastery is fixed at 1.0, others are 0.0-1.0 based on job requirements.
-
-    Args:
-        job_description: Raw job description text
-        tech_skills: List of extracted technical skills
-        company_culture: Optional company culture information
-
-    Returns:
-        Dictionary mapping feature names to weights (0.0-1.0)
-    """
-    # Features to weight (excluding Technical Mastery which is fixed)
-    features_to_weight = [f for f in FEATURES if f != "Technical Mastery"]
-
-    # Build prompt with optional culture information
-    culture_section = ""
-    if company_culture and company_culture.strip():
-        culture_section = f"""
-
-Company Culture Information:
-{company_culture}
-
-Use this culture information to inform your weight assignments. For example:
-- If the company values innovation and creativity, increase "Creative Divergence" weight
-- If the company emphasizes teamwork, increase "Team Elevation" and "Cultural Agreeableness" weights
-- If the company values leadership and initiative, increase "Leadership Initiative" weight
-- If the company has a fast-paced, resilient culture, increase "Resilience & Grit" weight
-"""
-
-    prompt = f"""You are an expert recruiter analyzing job requirements. Based on this job description,
-assign importance weights (0.0 to 1.0) for the following candidate evaluation criteria.
-
-Technical skills identified: {', '.join(tech_skills) if tech_skills else "None specified"}
-{culture_section}
-Evaluation criteria to weight:
-{chr(10).join(f'- {f}' for f in features_to_weight)}
-
-Guidelines:
-- 1.0 = Critical for this role
-- 0.7-0.9 = Very important
-- 0.4-0.6 = Moderately important
-- 0.1-0.3 = Nice to have
-- 0.0 = Not relevant
-
-Consider:
-- Seniority level (junior vs senior)
-- Role type (IC vs manager, individual vs team-focused)
-- Company stage (startup vs enterprise)
-- Technical complexity
-- Company culture and values (if provided above)
-
-Return ONLY a JSON object with feature names as keys and weights as values.
-Example: {{"Discipline & Consistency": 0.8, "Execution Reliability": 0.9, ...}}
-
-Job Description:
-{job_description}
-"""
-
-    try:
-        response = client.models.generate_content(
-            model="gemini-2.0-flash-exp",
-            contents=prompt
-        )
-
-        # Parse JSON from response
-        result = response.text.strip()
-        if result.startswith('```json'):
-            result = result.split('```json')[1].split('```')[0].strip()
-        elif result.startswith('```'):
-            result = result.split('```')[1].split('```')[0].strip()
-
-        weights = json.loads(result)
-
-        # Add fixed Technical Mastery weight
-        weights["Technical Mastery"] = 1.0
-
-        # Validate all features are present
-        for feature in FEATURES:
-            if feature not in weights:
-                weights[feature] = 0.5  # Default fallback
-
-        return weights
-    except Exception as e:
-        print(f"Error generating weights: {e}")
-        # Fallback: return default weights
-        return {feature: 1.0 if feature == "Technical Mastery" else 0.5
-                for feature in FEATURES}
-
-
-def analyze_job(job_description: str, company_name: Optional[str] = None) -> Dict:
-    """
-    Complete analysis pipeline: extract skills and generate feature weights.
-
-    Args:
-        job_description: Raw job description text
-        company_name: Optional company name for culture analysis
-
-    Returns:
-        Dictionary with tech_skills, weights, and company culture info
-    """
-    print("Extracting technical skills...")
-    tech_skills = extract_tech_skills(job_description)
-
-    print(f"Found {len(tech_skills)} technical skills")
+    Analyze a job posting from a URL and return extracted features and weights.
     
-    # Fetch company culture if company name is provided
-    company_culture = ""
-    if company_name:
-        print(f"Fetching company culture information for: {company_name}")
-        company_culture = fetch_company_culture(company_name)
-        if company_culture:
-            print("✓ Company culture information retrieved")
-        else:
-            print("⚠ No company culture information available")
-        print()
-    
-    print("Generating feature weights...")
-    weights = generate_feature_weights(job_description, tech_skills, company_culture)
-
-    result = {
-        "tech_skills": tech_skills,
-        "weights": weights
-    }
-    
-    if company_name:
-        result["company_name"] = company_name
-    if company_culture:
-        result["company_culture"] = company_culture
-    
-    return result
-
-
-def analyze_job_from_url(url: str, company_name: Optional[str] = None) -> Dict:
-    """
-    Analyze job posting directly from URL.
-
     Args:
         url: URL of the job posting
-        company_name: Optional company name for culture analysis
-
+        company: Company name
+        n: Number of technical and behavioral features to extract (default: 5)
+        
     Returns:
-        Dictionary with url, job_description, tech_skills, weights, and company culture
+        Dictionary with the following structure:
+        {
+            "url": str,
+            "company": str,
+            "job_description": str,
+            "features": List[str],
+            "weights": List[float],
+            "types": List[str],  # "technical" or "behavioral"
+            "weights_dict": Dict[str, float]  # Convenience dict: feature -> weight
+        }
     """
-    print(f"Scraping job description from: {url}")
-    print()
-
     job_description = scrape_job_description(url)
-
-    print(f"✓ Extracted {len(job_description)} characters")
-    print()
-
-    print("Extracting technical skills...")
-    tech_skills = extract_tech_skills(job_description)
-
-    print(f"✓ Found {len(tech_skills)} technical skills")
-    print()
-
-    # Fetch company culture if company name is provided
-    company_culture = ""
-    if company_name:
-        print(f"Fetching company culture information for: {company_name}")
-        company_culture = fetch_company_culture(company_name)
-        if company_culture:
-            print("✓ Company culture information retrieved")
-        else:
-            print("⚠ No company culture information available")
-        print()
-
-    print("Generating feature weights...")
-    weights = generate_feature_weights(job_description, tech_skills, company_culture)
-
-    print("✓ Analysis complete")
-    print()
-
-    result = {
-        "url": url,
-        "job_description": job_description,
-        "tech_skills": tech_skills,
-        "weights": weights
-    }
+    result = extract_features_with_weights(job_description, company, n)
     
-    if company_name:
-        result["company_name"] = company_name
-    if company_culture:
-        result["company_culture"] = company_culture
+    # Add URL and original job description to result
+    result["url"] = url
+    result["job_description"] = job_description
+    
+    # Create a convenience dictionary mapping feature names to weights
+    weights_dict = {
+        feature: weight 
+        for feature, weight in zip(result.get("features", []), result.get("weights", []))
+    }
+    result["weights_dict"] = weights_dict
+    
+    # Persist results if requested
+    if output_file is None:
+        output_file = "data/job_requirements.json"
+    try:
+        saved_path = save_job_analysis(result, output_file=output_file, project_root=project_root)
+        result["saved_path"] = str(saved_path)
+    except Exception as e:
+        # Attach information but do not fail the analysis
+        result["saved_path_error"] = str(e)
+
+    return result
+
+
+def analyze_job(job_description: str, company: str, n: int = 5) -> Dict:
+    """
+    Analyze a job description from text and return extracted features and weights.
+    
+    Args:
+        job_description: Job description text
+        company: Company name
+        n: Number of technical and behavioral features to extract (default: 5)
+        
+    Returns:
+        Dictionary with the same structure as analyze_job_from_url
+    """
+    result = extract_features_with_weights(job_description, company, n)
+    result["url"] = "text_input"
+    result["job_description"] = job_description
+    
+    # Create a convenience dictionary mapping feature names to weights
+    weights_dict = {
+        feature: weight 
+        for feature, weight in zip(result.get("features", []), result.get("weights", []))
+    }
+    result["weights_dict"] = weights_dict
     
     return result
+
+
+# ---------------------------------------------------------------------------
+# FILE I/O HELPERS
+# ---------------------------------------------------------------------------
 
 
 def save_job_analysis(result: Dict, output_file: str = "data/job_requirements.json", 
@@ -448,7 +306,7 @@ def load_job_analysis(input_file: str = "data/job_requirements.json",
         project_root: Optional project root path (defaults to auto-detected)
         
     Returns:
-        Job analysis result dictionary
+        Job analysis result dictionary with weights_dict ensured
         
     Raises:
         FileNotFoundError: If the file doesn't exist
@@ -458,155 +316,121 @@ def load_job_analysis(input_file: str = "data/job_requirements.json",
     input_path = project_root / input_file
     
     if not input_path.exists():
-            raise FileNotFoundError(
+        raise FileNotFoundError(
             f"Job analysis file not found: {input_path}\n"
-            f"Please run job_requirements_analyzer.py first to generate the analysis."
+            f"Please run job analysis first to generate the file."
         )
     
     with open(input_path, 'r') as f:
-        return json.load(f)
+        result = json.load(f)
+    
+    # Ensure weights_dict exists for backward compatibility
+    if "weights_dict" not in result:
+        if "features" in result and "weights" in result:
+            result["weights_dict"] = {
+                feature: weight 
+                for feature, weight in zip(result.get("features", []), result.get("weights", []))
+            }
+        elif "weights" in result and isinstance(result["weights"], dict):
+            result["weights_dict"] = result["weights"]
+        else:
+            result["weights_dict"] = {}
+    
+    return result
 
 
 def display_results(result: Dict):
-    """Display analysis results in a formatted way"""
+    """Display analysis results in a formatted way."""
     print()
     print("=" * 60)
     print("ANALYSIS RESULTS")
     print("=" * 60)
     print()
-
-    if "url" in result and result["url"] != "example":
+    
+    if "url" in result and result["url"] != "text_input":
         print(f"Source URL: {result['url']}")
         print()
     
-    if "company_name" in result:
-        print(f"Company: {result['company_name']}")
-        if "company_culture" in result and result["company_culture"]:
-            print(f"Company Culture: {result['company_culture'][:200]}...")
+    if "company" in result:
+        print(f"Company: {result['company']}")
         print()
-
-    print("Technical Skills Identified:")
-    print("-" * 60)
-    for skill in result["tech_skills"]:
-        print(f"  • {skill}")
-    print()
-
-    print("Feature Weights (Technical Mastery = 1.0 baseline):")
-    print("-" * 60)
-    for feature in FEATURES:
-        weight = result["weights"].get(feature, 0.5)
-        bar = "█" * int(weight * 20)
-        print(f"  {feature:.<30} {weight:.2f} {bar}")
-    print()
-
-
-def main():
-    """Main CLI interface"""
-    import argparse
     
-    parser = argparse.ArgumentParser(
-        description="Job Feature Weight Analyzer - Analyzes job postings and generates candidate evaluation weights"
-    )
-    parser.add_argument(
-        "url",
-        nargs="?",
-        help="URL of the job posting to analyze"
-    )
-    parser.add_argument(
-        "--company",
-        type=str,
-        help="Company name for culture analysis"
-    )
+    features = result.get("features", [])
+    weights = result.get("weights", [])
+    types = result.get("types", [])
     
-    args = parser.parse_args()
-    
-    print("=" * 60)
-    print("Job Feature Weight Analyzer")
-    print("=" * 60)
-    print()
-
-    # Check if URL provided as command line argument
-    if args.url:
-        # Validate that the argument is actually a URL
-        parsed = urlparse(args.url)
-        if parsed.scheme in ('http', 'https') and parsed.netloc:
-            # Valid URL provided
-            print(f"Mode: URL Analysis")
-            if args.company:
-                print(f"Company: {args.company}")
+    if features and weights and types:
+        print("Extracted Features:")
+        print("-" * 60)
+        
+        # Group by type
+        technical_features = [
+            (f, w) for f, w, t in zip(features, weights, types) if t == "technical"
+        ]
+        behavioral_features = [
+            (f, w) for f, w, t in zip(features, weights, types) if t == "behavioral"
+        ]
+        
+        if technical_features:
+            print("Technical Features:")
+            for feature, weight in technical_features:
+                bar = "█" * int(weight * 20)
+                print(f"  • {feature:.<30} {weight:.2f} {bar}")
             print()
-
-            try:
-                result = analyze_job_from_url(args.url, company_name=args.company)
-            except ValueError as e:
-                print(f"Error: {e}")
-                print()
-                print("Please provide a valid job posting URL")
-                sys.exit(1)
-        else:
-            # Not a valid URL, show error
-            print(f"Error: Invalid URL format: {args.url}")
+        
+        if behavioral_features:
+            print("Behavioral Features:")
+            for feature, weight in behavioral_features:
+                bar = "█" * int(weight * 20)
+                print(f"  • {feature:.<30} {weight:.2f} {bar}")
             print()
-            print("Please provide a valid URL starting with http:// or https://")
-            print()
-            print("Usage:")
-            print("  python job_requirements_analyzer.py <job_posting_url> [--company COMPANY_NAME]")
-            print()
-            print("Example:")
-            print("  python job_requirements_analyzer.py https://example.com/jobs/senior-engineer --company Google")
-            sys.exit(1)
     else:
-        # Use example job description for testing
-        print("Mode: Example Analysis (no URL provided)")
-        if args.company:
-            print(f"Company: {args.company}")
+        print("No features extracted.")
         print()
-
-        example_job = """
-Senior Machine Learning Engineer
-
-We are seeking a Senior ML Engineer to join our AI research team.
-
-Requirements:
-- 5+ years of experience in machine learning and deep learning
-- Expert in Python, PyTorch, and TensorFlow
-- Experience with distributed training and MLOps
-- Strong research background with publications preferred
-- Excellent communication skills for cross-functional collaboration
-- Self-motivated and able to work independently
-- Experience mentoring junior engineers
-
-Responsibilities:
-- Design and implement ML models for production
-- Collaborate with research team on novel algorithms
-- Optimize model performance and scalability
-- Lead technical discussions and code reviews
-        """
-
-        print("Using example job description:")
-        print("-" * 60)
-        print(example_job.strip()[:200] + "...")
-        print("-" * 60)
-        print()
-
-        result = analyze_job(example_job, company_name=args.company)
-        result["url"] = "example"
-
-    # Display results
-    display_results(result)
-
-    # Export JSON
-    output_path = save_job_analysis(result)
-    print(f"Full results saved to: {output_path}")
-    print()
-    print("=" * 60)
-    print("Usage:")
-    print("  python job_requirements_analyzer.py                    # Use example")
-    print("  python job_requirements_analyzer.py <job_posting_url>  # Analyze URL")
-    print("  python job_requirements_analyzer.py <job_posting_url> --company COMPANY_NAME  # With company culture")
+    
     print("=" * 60)
     print()
 
+
+# ---------------------------------------------------------------------------
+# FASTAPI ENDPOINT
+# ---------------------------------------------------------------------------
+
+# class JobRequest(BaseModel):
+#     url: str
+#     company: str
+#     n: Optional[int] = 5
+
+
+# @app.post("/analyze_job")
+# def analyze_job_endpoint(req: JobRequest):
+#     """
+#     POST endpoint that receives:
+#       {
+#         "url": "https://...",
+#         "company": "CompanyName",
+#         "n": 5
+#       }
+#     and returns extracted features and weights.
+#     """
+#     try:
+#         return analyze_job_from_url(req.url, req.company, req.n)
+#     except ValueError as e:
+#         raise HTTPException(status_code=400, detail=str(e))
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Feature extraction failed: {e}")
+
+
+# ---------------------------------------------------------------------------
+# RUN LOCAL (optional)
+# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    main()
+    #import uvicorn
+    #uvicorn.run(app, host="0.0.0.0", port=8000)
+    url = "https://careers.lululemon.com/en_US/careers/JobDetail/Guest-Experience-Lead-Crossgates-Mall/55003"
+    company = "Lululemon"
+    n = 5
+    result = analyze_job_from_url(url, company, n)
+    display_results(result)
+
