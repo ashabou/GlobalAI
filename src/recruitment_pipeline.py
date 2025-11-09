@@ -12,7 +12,7 @@ from typing import Optional
 # Add src directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
-from job_analyzer import (
+from job_requirements_analyzer import (
     analyze_job_from_url,
     analyze_job,
     save_job_analysis,
@@ -20,7 +20,7 @@ from job_analyzer import (
     display_results,
     get_project_root
 )
-from candidate_ranking import (
+from candidate_evaluator import (
     get_candidate_ids,
     convert_weights_to_requirements,
     evaluate_all_candidates,
@@ -33,6 +33,7 @@ def run_full_pipeline(
     job_url: Optional[str] = None,
     job_description: Optional[str] = None,
     job_analysis_file: Optional[str] = None,
+    company_name: Optional[str] = None,
     candidate_ids: Optional[list] = None,
     output_dir: str = "data"
 ) -> dict:
@@ -43,6 +44,7 @@ def run_full_pipeline(
         job_url: URL of job posting to analyze
         job_description: Direct job description text (alternative to URL)
         job_analysis_file: Path to existing job analysis file (skip analysis step)
+        company_name: Optional company name for culture analysis
         candidate_ids: List of candidate IDs to evaluate (defaults to auto-discover)
         output_dir: Directory for output files (relative to project root)
         
@@ -70,17 +72,21 @@ def run_full_pipeline(
     elif job_url:
         # Analyze from URL
         print(f"Analyzing job posting from URL: {job_url}")
-        job_analysis = analyze_job_from_url(job_url)
+        if company_name:
+            print(f"Company: {company_name}")
+        job_analysis = analyze_job_from_url(job_url, company_name=company_name)
         job_analysis_path = save_job_analysis(job_analysis, 
-                                             output_file=f"{output_dir}/job_analysis.json")
+                                             output_file=f"{output_dir}/job_requirements.json")
         print(f"✓ Job analysis saved to: {job_analysis_path}")
     elif job_description:
         # Analyze from text
         print("Analyzing job description from text")
-        job_analysis = analyze_job(job_description)
+        if company_name:
+            print(f"Company: {company_name}")
+        job_analysis = analyze_job(job_description, company_name=company_name)
         job_analysis["url"] = "text_input"
         job_analysis_path = save_job_analysis(job_analysis,
-                                             output_file=f"{output_dir}/job_analysis.json")
+                                             output_file=f"{output_dir}/job_requirements.json")
         print(f"✓ Job analysis saved to: {job_analysis_path}")
     else:
         raise ValueError(
@@ -114,7 +120,7 @@ def run_full_pipeline(
     # Step 4: Evaluate all candidates
     print("STEP 4: Evaluating Candidates")
     print("-" * 80)
-    profiles_file = f"{output_dir}/candidate_profiles.json"
+    profiles_file = f"{output_dir}/candidate_evaluations.json"
     all_profiles = evaluate_all_candidates(
         candidate_ids=candidate_ids,
         requirements=requirements,
@@ -155,6 +161,11 @@ def main():
         help="Path to existing job analysis JSON file (skip analysis step)"
     )
     parser.add_argument(
+        "--company",
+        type=str,
+        help="Company name for culture analysis"
+    )
+    parser.add_argument(
         "--candidates",
         type=int,
         nargs="+",
@@ -173,6 +184,7 @@ def main():
         result = run_full_pipeline(
             job_url=args.url,
             job_analysis_file=args.job_file,
+            company_name=args.company,
             candidate_ids=args.candidates,
             output_dir=args.output_dir
         )

@@ -14,7 +14,7 @@ from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).parent))
 
-from profile_agent import evaluate_candidate, CandidateEvaluation, FeatureScore
+from candidate_profile_evaluator import evaluate_candidate, CandidateEvaluation, FeatureScore
 
 
 def ensure_evaluation_model(evaluation) -> CandidateEvaluation:
@@ -88,13 +88,13 @@ def get_candidate_ids(data_dir: Optional[Path] = None) -> List[int]:
 
 def convert_weights_to_requirements(weights: Dict[str, float]) -> dict:
     """
-    Convert job_analyzer weight format to requirements format for profile_agent.
+    Convert job_requirements_analyzer weight format to requirements format for candidate_profile_evaluator.
     
     Args:
-        weights: Dictionary mapping feature names to weights (from job_analyzer)
+        weights: Dictionary mapping feature names to weights (from job_requirements_analyzer)
         
     Returns:
-        Requirements dictionary in format expected by profile_agent
+        Requirements dictionary in format expected by candidate_profile_evaluator
     """
     features = [
         {"name": feature_name, "weight": weight}
@@ -106,7 +106,7 @@ def convert_weights_to_requirements(weights: Dict[str, float]) -> dict:
 def evaluate_all_candidates(
     candidate_ids: List[int],
     requirements: dict,
-    output_file: str = "data/candidate_profiles.json",
+    output_file: str = "data/candidate_evaluations.json",
     project_root: Optional[Path] = None
 ) -> Dict[int, CandidateEvaluation]:
     """
@@ -135,6 +135,18 @@ def evaluate_all_candidates(
         print(f"{'='*60}")
         
         try:
+            # Check what documents are available for this candidate
+            project_root = get_project_root()
+            candidate_dir = project_root / "data" / f"candidate_{candidate_id}"
+            
+            if candidate_dir.exists():
+                # List available documents
+                available_files = [f.name for f in candidate_dir.iterdir() if f.is_file()]
+                if available_files:
+                    print(f"   Documents found: {', '.join(available_files)}")
+                else:
+                    print(f"   ⚠ No documents found in candidate directory")
+            
             evaluation = evaluate_candidate(candidate_id, requirements)
             # Ensure evaluation is a Pydantic model (defensive programming)
             evaluation = ensure_evaluation_model(evaluation)
@@ -196,7 +208,7 @@ def evaluate_all_candidates(
 
 
 def rank_candidates_by_affinity(
-    profiles_file: str = "data/candidate_profiles.json",
+    profiles_file: str = "data/candidate_evaluations.json",
     project_root: Optional[Path] = None
 ) -> List[Dict]:
     """

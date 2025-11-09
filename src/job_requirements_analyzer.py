@@ -138,6 +138,46 @@ def scrape_job_description(url: str) -> str:
         raise ValueError(f"Error scraping page: {e}")
 
 
+def fetch_company_culture(company_name: str) -> str:
+    """
+    Fetch company culture information using LLM knowledge.
+    
+    Args:
+        company_name: Name of the company
+        
+    Returns:
+        Company culture information as a string
+    """
+    if not company_name or not company_name.strip():
+        return ""
+    
+    prompt = f"""Based on your knowledge, provide a brief overview of the company culture and work environment for {company_name}.
+
+Focus on:
+- Work culture and values
+- Team collaboration style
+- Innovation and creativity emphasis
+- Leadership expectations
+- Work-life balance approach
+- Communication style
+- Growth and development opportunities
+
+Return a concise paragraph (3-5 sentences) describing the company culture. If you don't have specific information about this company, provide general observations based on the company name and industry if possible, or return "No specific culture information available."
+"""
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.0-flash-exp",
+            contents=prompt
+        )
+        
+        culture_info = response.text.strip()
+        return culture_info
+    except Exception as e:
+        print(f"Warning: Could not fetch company culture information: {e}")
+        return ""
+
+
 def extract_tech_skills(job_description: str) -> List[str]:
     """
     Extract technical skills and technologies mentioned in job description.
@@ -180,7 +220,8 @@ Job Description:
         return []
 
 
-def generate_feature_weights(job_description: str, tech_skills: List[str]) -> Dict[str, float]:
+def generate_feature_weights(job_description: str, tech_skills: List[str], 
+                              company_culture: str = "") -> Dict[str, float]:
     """
     Generate weights for all 10 candidate evaluation features.
     Technical Mastery is fixed at 1.0, others are 0.0-1.0 based on job requirements.
@@ -188,6 +229,7 @@ def generate_feature_weights(job_description: str, tech_skills: List[str]) -> Di
     Args:
         job_description: Raw job description text
         tech_skills: List of extracted technical skills
+        company_culture: Optional company culture information
 
     Returns:
         Dictionary mapping feature names to weights (0.0-1.0)
@@ -195,11 +237,26 @@ def generate_feature_weights(job_description: str, tech_skills: List[str]) -> Di
     # Features to weight (excluding Technical Mastery which is fixed)
     features_to_weight = [f for f in FEATURES if f != "Technical Mastery"]
 
+    # Build prompt with optional culture information
+    culture_section = ""
+    if company_culture and company_culture.strip():
+        culture_section = f"""
+
+Company Culture Information:
+{company_culture}
+
+Use this culture information to inform your weight assignments. For example:
+- If the company values innovation and creativity, increase "Creative Divergence" weight
+- If the company emphasizes teamwork, increase "Team Elevation" and "Cultural Agreeableness" weights
+- If the company values leadership and initiative, increase "Leadership Initiative" weight
+- If the company has a fast-paced, resilient culture, increase "Resilience & Grit" weight
+"""
+
     prompt = f"""You are an expert recruiter analyzing job requirements. Based on this job description,
 assign importance weights (0.0 to 1.0) for the following candidate evaluation criteria.
 
-Technical skills identified: {', '.join(tech_skills)}
-
+Technical skills identified: {', '.join(tech_skills) if tech_skills else "None specified"}
+{culture_section}
 Evaluation criteria to weight:
 {chr(10).join(f'- {f}' for f in features_to_weight)}
 
@@ -215,6 +272,7 @@ Consider:
 - Role type (IC vs manager, individual vs team-focused)
 - Company stage (startup vs enterprise)
 - Technical complexity
+- Company culture and values (if provided above)
 
 Return ONLY a JSON object with feature names as keys and weights as values.
 Example: {{"Discipline & Consistency": 0.8, "Execution Reliability": 0.9, ...}}
@@ -254,39 +312,59 @@ Job Description:
                 for feature in FEATURES}
 
 
-def analyze_job(job_description: str) -> Dict:
+def analyze_job(job_description: str, company_name: Optional[str] = None) -> Dict:
     """
     Complete analysis pipeline: extract skills and generate feature weights.
 
     Args:
         job_description: Raw job description text
+        company_name: Optional company name for culture analysis
 
     Returns:
-        Dictionary with tech_skills and weights
+        Dictionary with tech_skills, weights, and company culture info
     """
     print("Extracting technical skills...")
     tech_skills = extract_tech_skills(job_description)
 
     print(f"Found {len(tech_skills)} technical skills")
+    
+    # Fetch company culture if company name is provided
+    company_culture = ""
+    if company_name:
+        print(f"Fetching company culture information for: {company_name}")
+        company_culture = fetch_company_culture(company_name)
+        if company_culture:
+            print("✓ Company culture information retrieved")
+        else:
+            print("⚠ No company culture information available")
+        print()
+    
     print("Generating feature weights...")
+    weights = generate_feature_weights(job_description, tech_skills, company_culture)
 
-    weights = generate_feature_weights(job_description, tech_skills)
-
-    return {
+    result = {
         "tech_skills": tech_skills,
         "weights": weights
     }
+    
+    if company_name:
+        result["company_name"] = company_name
+    if company_culture:
+        result["company_culture"] = company_culture
+    
+    return result
 
 
-def analyze_job_from_url(url: str) -> Dict:
+def analyze_job_from_url(url: str, company_name: Optional[str] = None) -> Dict:
     """
     Analyze job posting directly from URL.
 
     Args:
         url: URL of the job posting
+        company_name: Optional company name for culture analysis
 
     Returns:
-        Dictionary with url, job_description, tech_skills and weights
+        Dictionary with url, job_description, tech_skills, weights, and company culture
     """
     print(f"Scraping job description from: {url}")
     print()
@@ -302,21 +380,39 @@ def analyze_job_from_url(url: str) -> Dict:
     print(f"✓ Found {len(tech_skills)} technical skills")
     print()
 
+    # Fetch company culture if company name is provided
+    company_culture = ""
+    if company_name:
+        print(f"Fetching company culture information for: {company_name}")
+        company_culture = fetch_company_culture(company_name)
+        if company_culture:
+            print("✓ Company culture information retrieved")
+        else:
+            print("⚠ No company culture information available")
+        print()
+
     print("Generating feature weights...")
-    weights = generate_feature_weights(job_description, tech_skills)
+    weights = generate_feature_weights(job_description, tech_skills, company_culture)
 
     print("✓ Analysis complete")
     print()
 
-    return {
+    result = {
         "url": url,
         "job_description": job_description,
         "tech_skills": tech_skills,
         "weights": weights
     }
+    
+    if company_name:
+        result["company_name"] = company_name
+    if company_culture:
+        result["company_culture"] = company_culture
+    
+    return result
 
 
-def save_job_analysis(result: Dict, output_file: str = "data/job_analysis.json", 
+def save_job_analysis(result: Dict, output_file: str = "data/job_requirements.json", 
                       project_root: Optional[Path] = None) -> Path:
     """
     Save job analysis results to a JSON file.
@@ -342,7 +438,7 @@ def save_job_analysis(result: Dict, output_file: str = "data/job_analysis.json",
     return output_path
 
 
-def load_job_analysis(input_file: str = "data/job_analysis.json",
+def load_job_analysis(input_file: str = "data/job_requirements.json",
                       project_root: Optional[Path] = None) -> Dict:
     """
     Load job analysis results from a JSON file.
@@ -362,9 +458,9 @@ def load_job_analysis(input_file: str = "data/job_analysis.json",
     input_path = project_root / input_file
     
     if not input_path.exists():
-        raise FileNotFoundError(
+            raise FileNotFoundError(
             f"Job analysis file not found: {input_path}\n"
-            f"Please run job_analyzer.py first to generate the analysis."
+            f"Please run job_requirements_analyzer.py first to generate the analysis."
         )
     
     with open(input_path, 'r') as f:
@@ -381,6 +477,12 @@ def display_results(result: Dict):
 
     if "url" in result and result["url"] != "example":
         print(f"Source URL: {result['url']}")
+        print()
+    
+    if "company_name" in result:
+        print(f"Company: {result['company_name']}")
+        if "company_culture" in result and result["company_culture"]:
+            print(f"Company Culture: {result['company_culture'][:200]}...")
         print()
 
     print("Technical Skills Identified:")
@@ -400,24 +502,42 @@ def display_results(result: Dict):
 
 def main():
     """Main CLI interface"""
+    import argparse
+    
+    parser = argparse.ArgumentParser(
+        description="Job Feature Weight Analyzer - Analyzes job postings and generates candidate evaluation weights"
+    )
+    parser.add_argument(
+        "url",
+        nargs="?",
+        help="URL of the job posting to analyze"
+    )
+    parser.add_argument(
+        "--company",
+        type=str,
+        help="Company name for culture analysis"
+    )
+    
+    args = parser.parse_args()
+    
     print("=" * 60)
     print("Job Feature Weight Analyzer")
     print("=" * 60)
     print()
 
     # Check if URL provided as command line argument
-    if len(sys.argv) > 1:
-        arg = sys.argv[1]
-
+    if args.url:
         # Validate that the argument is actually a URL
-        parsed = urlparse(arg)
+        parsed = urlparse(args.url)
         if parsed.scheme in ('http', 'https') and parsed.netloc:
             # Valid URL provided
             print(f"Mode: URL Analysis")
+            if args.company:
+                print(f"Company: {args.company}")
             print()
 
             try:
-                result = analyze_job_from_url(arg)
+                result = analyze_job_from_url(args.url, company_name=args.company)
             except ValueError as e:
                 print(f"Error: {e}")
                 print()
@@ -425,19 +545,21 @@ def main():
                 sys.exit(1)
         else:
             # Not a valid URL, show error
-            print(f"Error: Invalid URL format: {arg}")
+            print(f"Error: Invalid URL format: {args.url}")
             print()
             print("Please provide a valid URL starting with http:// or https://")
             print()
             print("Usage:")
-            print("  python job_analyzer.py <job_posting_url>")
+            print("  python job_requirements_analyzer.py <job_posting_url> [--company COMPANY_NAME]")
             print()
             print("Example:")
-            print("  python job_analyzer.py https://example.com/jobs/senior-engineer")
+            print("  python job_requirements_analyzer.py https://example.com/jobs/senior-engineer --company Google")
             sys.exit(1)
     else:
         # Use example job description for testing
         print("Mode: Example Analysis (no URL provided)")
+        if args.company:
+            print(f"Company: {args.company}")
         print()
 
         example_job = """
@@ -467,7 +589,7 @@ Responsibilities:
         print("-" * 60)
         print()
 
-        result = analyze_job(example_job)
+        result = analyze_job(example_job, company_name=args.company)
         result["url"] = "example"
 
     # Display results
@@ -479,8 +601,9 @@ Responsibilities:
     print()
     print("=" * 60)
     print("Usage:")
-    print("  python job_analyzer.py                    # Use example")
-    print("  python job_analyzer.py <job_posting_url>  # Analyze URL")
+    print("  python job_requirements_analyzer.py                    # Use example")
+    print("  python job_requirements_analyzer.py <job_posting_url>  # Analyze URL")
+    print("  python job_requirements_analyzer.py <job_posting_url> --company COMPANY_NAME  # With company culture")
     print("=" * 60)
     print()
 
