@@ -23,8 +23,12 @@ import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from google import genai
+<<<<<<< HEAD
 from fastapi import FastAPI
 from fastapi import HTTPException
+=======
+from fastapi import FastAPI, HTTPException
+>>>>>>> 63efab3a2be71bb14c0a0b3b69461e11b1cead79
 from pydantic import BaseModel
 
 # Load environment variables
@@ -43,7 +47,24 @@ client = genai.Client(
     project=PROJECT_ID,
     location=LOCATION
 )
+
+
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(title="Job Feature Extraction API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],            # or the specific Lovable origin
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/health")
+def health_check() -> Dict[str, str]:
+    return {"status": "ok"}
 
 
 # ---------------------------------------------------------------------------
@@ -413,8 +434,24 @@ class JobRequest(BaseModel):
     company: str
     n: Optional[int] = 5
 
+<<<<<<< HEAD
 @app.post("/analyze_job/")
 def analyze_job_endpoint(req: JobRequest):  # Use Pydantic model, not Query params
+=======
+
+@app.post("/analyze_job")
+def analyze_job_endpoint(req: JobRequest):
+    """
+    POST endpoint that receives:
+      {
+        "url": "https://...",
+        "company": "CompanyName",
+        "n": 5
+      }
+    and returns extracted features and weights.
+    """
+    print("Incoming /analyze_job request:", req.url)
+>>>>>>> 63efab3a2be71bb14c0a0b3b69461e11b1cead79
     try:
         print(f"Received request - URL: {req.url}, Company: {req.company}, N: {req.n}")
         result = analyze_job_from_url(req.url, req.company, req.n)
@@ -427,6 +464,7 @@ def analyze_job_endpoint(req: JobRequest):  # Use Pydantic model, not Query para
         print(f"Exception: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Feature extraction failed: {e}")
 
+<<<<<<< HEAD
 # ---------------------------------------------------------------------------
 # RUN LOCAL (optional)
 # ---------------------------------------------------------------------------
@@ -440,3 +478,5 @@ def analyze_job_endpoint(req: JobRequest):  # Use Pydantic model, not Query para
 #     result = analyze_job_from_url(url, company, n)
 #     display_results(result)
 
+=======
+>>>>>>> 63efab3a2be71bb14c0a0b3b69461e11b1cead79
