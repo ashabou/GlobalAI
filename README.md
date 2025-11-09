@@ -37,27 +37,7 @@ candidates and organizations.
 
 ## Architecture at a Glance
 
-```
-┌──────────────────────┐    ┌──────────────────────────┐
-│  Job Requirements    │    │  Candidate Evaluation    │
-│  Analyzer (Agent A)  │ -> │  Runner (Agent B)        │
-└─────────┬────────────┘    └────────────┬─────────────┘
-          │                               │
-          │                               ▼
-          │                   ┌──────────────────────────┐
-          │                   │  Feedback Generator      │
-          │                   │  (Agent C)               │
-          │                   └────────────┬─────────────┘
-          │                               │
-          ▼                               ▼
-┌──────────────────────────┐    ┌────────────────────────────┐
-│ Question Generator       │    │ FastAPI Unified Interface  │
-│ (Agent D, per-candidate) │    │ (app.py)                   │
-└──────────────────────────┘    └────────────────────────────┘
-```
-
-* Agents share JSON outputs in the `data/` directory, making the pipeline easy to
-understand, debug, and extend.
+![Architecture Diagram](figure_scheme.pdf)
 
 ## Repository Structure
 
@@ -71,7 +51,6 @@ understand, debug, and extend.
 | `src/candidate_profile_evaluator.py`   | Reads candidate documents (CV/LinkedIn), calls Google GenAI for feature scoring.
 | `src/candidate_feedback_generator.py`  | Generates personalized growth feedback for one candidate.
 | `src/question_generator.py`            | Agent D: generates interview questions tailored to a single candidate.
-| `data/`                                | Stores generated JSON artifacts (requirements, evaluations, feedback, questions).
 | `requirements.txt`                     | Python dependencies.
 
 ## Prerequisites
@@ -97,6 +76,9 @@ pip install -r requirements.txt
 
 # 4. Configure environment
 cp .env.example .env           # edit GOOGLE_CLOUD_PROJECT, etc.
+
+# 5. Unpack the provided data bundle (contains sample CVs, evaluations…)
+unzip data.zip -d data
 ```
 
 Ensure the following env variables are set (via `.env` or environment):
@@ -166,18 +148,7 @@ This orchestrates all agents sequentially and saves artifacts in `data/`.
 ```
 python src/question_generator.py 6
 ```
-Generates `data/questions/candidate_6_questions.json` using the job requirements &
-latest evaluation results.
-
-## Data Artifacts
-
-| File / Folder                                | Purpose |
-|----------------------------------------------|---------|
-| `data/job_requirements.json`                 | Features & weights extracted from job posting |
-| `data/candidate_evaluations.json`            | Feature scores, affinity scores per candidate |
-| `data/candidate_feedback.json`               | Summary of generated feedback |
-| `data/feedback/candidate_<id>_feedback.json`| Personalized feedback per candidate |
-| `data/questions/candidate_<id>_questions.json`| Interview question set per candidate |
+Saves the resulting question set under `data/questions/` (created from the unpacked zip).
 
 ## Technical Highlights
 
