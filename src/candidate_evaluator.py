@@ -57,7 +57,7 @@ def get_project_root() -> Path:
     return Path(__file__).parent.parent
 
 
-def get_candidate_ids(data_dir: Optional[Path] = None) -> List[int]:
+def get_candidate_ids(project_root: Path, data_dir: Optional[Path] = None) -> List[int]:
     """
     Discover candidate IDs from the data directory.
     
@@ -68,7 +68,7 @@ def get_candidate_ids(data_dir: Optional[Path] = None) -> List[int]:
         List of candidate IDs found
     """
     if data_dir is None:
-        data_dir = get_project_root() / "data"
+        data_dir = project_root / "data"
     
     candidate_ids = []
     
@@ -107,7 +107,7 @@ def evaluate_all_candidates(
     candidate_ids: List[int],
     requirements: dict,
     output_file: str = "data/candidate_evaluations.json",
-    project_root: Optional[Path] = None
+    project_root: Path = None
 ) -> Dict[int, CandidateEvaluation]:
     """
     Evaluate all candidates and save their profiles to a JSON file.
@@ -136,7 +136,6 @@ def evaluate_all_candidates(
         
         try:
             # Check what documents are available for this candidate
-            project_root = get_project_root()
             candidate_dir = project_root / "data" / f"candidate_{candidate_id}"
             
             if candidate_dir.exists():
@@ -209,7 +208,7 @@ def evaluate_all_candidates(
 
 def rank_candidates_by_affinity(
     profiles_file: str = "data/candidate_evaluations.json",
-    project_root: Optional[Path] = None
+    project_root: Path = None
 ) -> List[Dict]:
     """
     Read candidate profiles from a JSON file and rank them by affinity score.
@@ -285,8 +284,11 @@ if __name__ == "__main__":
         ]
     }
     
-    # Get all candidate IDs from the data directory
-    candidate_ids = get_candidate_ids()
+    from candidate_profile_evaluator import get_project_root as _get_root
+
+    project_root = _get_root()
+
+    candidate_ids = get_candidate_ids(project_root)
     
     if not candidate_ids:
         print("❌ No candidates found in the data directory!")
@@ -298,13 +300,13 @@ if __name__ == "__main__":
     print("\n" + "="*80)
     print("STEP 1: Evaluating all candidates")
     print("="*80)
-    all_profiles = evaluate_all_candidates(candidate_ids, requirements)
+    all_profiles = evaluate_all_candidates(candidate_ids, requirements, project_root=project_root)
     
     # Rank candidates by affinity score
     print("\n" + "="*80)
     print("STEP 2: Ranking candidates by affinity score")
     print("="*80)
-    ranked_candidates = rank_candidates_by_affinity()
+    ranked_candidates = rank_candidates_by_affinity(project_root=project_root)
     
     # Print the ranking
     print_ranking(ranked_candidates, show_details=True)

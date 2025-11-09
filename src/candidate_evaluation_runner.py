@@ -69,7 +69,7 @@ def run_candidate_evaluation(
     requirements = convert_weights_to_requirements(weights)
 
     if candidate_ids is None:
-        candidate_ids = get_candidate_ids()
+        candidate_ids = get_candidate_ids(project_root)
 
     if not candidate_ids:
         raise ValueError("No candidates found in the data directory!")
