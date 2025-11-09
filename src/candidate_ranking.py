@@ -1,6 +1,12 @@
+#!/usr/bin/env python3
+"""
+Candidate Ranking Module
+Evaluates candidates against job requirements and ranks them by affinity score.
+"""
+
 import os
 import json
-from typing import List, Dict
+from typing import List, Dict, Optional
 from datetime import datetime
 from pathlib import Path
 
@@ -11,10 +17,97 @@ sys.path.insert(0, str(Path(__file__).parent))
 from profile_agent import evaluate_candidate, CandidateEvaluation, FeatureScore
 
 
+def ensure_evaluation_model(evaluation) -> CandidateEvaluation:
+    """
+    Ensure evaluation is a CandidateEvaluation Pydantic model.
+    Converts dict to model if necessary.
+    
+    Args:
+        evaluation: Either a CandidateEvaluation model or a dict
+        
+    Returns:
+        CandidateEvaluation Pydantic model
+        
+    Raises:
+        TypeError: If evaluation is not a dict or CandidateEvaluation
+        ValueError: If dict cannot be converted to CandidateEvaluation
+    """
+    if isinstance(evaluation, CandidateEvaluation):
+        return evaluation
+    elif isinstance(evaluation, dict):
+        # Convert dict to Pydantic model
+        # Pydantic will automatically convert nested dicts to FeatureScore objects
+        try:
+            return CandidateEvaluation(**evaluation)
+        except Exception as e:
+            # Provide more helpful error message
+            raise ValueError(
+                f"Failed to convert dict to CandidateEvaluation: {e}\n"
+                f"Dict keys: {list(evaluation.keys())}\n"
+                f"Dict content: {evaluation}"
+            ) from e
+    else:
+        raise TypeError(
+            f"Expected CandidateEvaluation or dict, got {type(evaluation)}: {evaluation}"
+        )
+
+
+def get_project_root() -> Path:
+    """Get the project root directory."""
+    return Path(__file__).parent.parent
+
+
+def get_candidate_ids(data_dir: Optional[Path] = None) -> List[int]:
+    """
+    Discover candidate IDs from the data directory.
+    
+    Args:
+        data_dir: Optional path to data directory (defaults to project_root/data)
+        
+    Returns:
+        List of candidate IDs found
+    """
+    if data_dir is None:
+        data_dir = get_project_root() / "data"
+    
+    candidate_ids = []
+    
+    if not data_dir.exists():
+        return candidate_ids
+    
+    for item in data_dir.iterdir():
+        if item.is_dir() and item.name.startswith("candidate_"):
+            try:
+                candidate_id = int(item.name.split("_")[1])
+                candidate_ids.append(candidate_id)
+            except (ValueError, IndexError):
+                continue
+    
+    return sorted(candidate_ids)
+
+
+def convert_weights_to_requirements(weights: Dict[str, float]) -> dict:
+    """
+    Convert job_analyzer weight format to requirements format for profile_agent.
+    
+    Args:
+        weights: Dictionary mapping feature names to weights (from job_analyzer)
+        
+    Returns:
+        Requirements dictionary in format expected by profile_agent
+    """
+    features = [
+        {"name": feature_name, "weight": weight}
+        for feature_name, weight in weights.items()
+    ]
+    return {"features": features}
+
+
 def evaluate_all_candidates(
     candidate_ids: List[int],
     requirements: dict,
-    output_file: str = "data/candidate_profiles.json"
+    output_file: str = "data/candidate_profiles.json",
+    project_root: Optional[Path] = None
 ) -> Dict[int, CandidateEvaluation]:
     """
     Evaluate all candidates and save their profiles to a JSON file.
@@ -23,12 +116,13 @@ def evaluate_all_candidates(
         candidate_ids: List of candidate IDs to evaluate
         requirements: Dictionary containing requirements with features and weights
         output_file: Path to the output JSON file (relative to project root)
+        project_root: Optional project root path (defaults to auto-detected)
         
     Returns:
         Dictionary mapping candidate IDs to their evaluations
     """
-    # Get project root (parent of src directory)
-    project_root = Path(__file__).parent.parent
+    if project_root is None:
+        project_root = get_project_root()
     output_path = project_root / output_file
     
     all_profiles = {}
@@ -42,6 +136,8 @@ def evaluate_all_candidates(
         
         try:
             evaluation = evaluate_candidate(candidate_id, requirements)
+            # Ensure evaluation is a Pydantic model (defensive programming)
+            evaluation = ensure_evaluation_model(evaluation)
             all_profiles[candidate_id] = evaluation
             
             print(f"✅ Candidate {candidate_id} evaluated successfully")
@@ -53,9 +149,11 @@ def evaluate_all_candidates(
         except Exception as e:
             print(f"❌ Error evaluating candidate {candidate_id}: {e}")
             print(f"   Error type: {type(e).__name__}")
+            import traceback
+            traceback.print_exc()
             continue
     
-    # Convert to serializable format
+    # Convert to serializable format (evaluation is a Pydantic model)
     profiles_data = {
         "metadata": {
             "evaluation_date": datetime.now().isoformat(),
@@ -66,18 +164,21 @@ def evaluate_all_candidates(
     }
     
     for candidate_id, evaluation in all_profiles.items():
-        print("evaluation: ", evaluation)
+        # Ensure evaluation is a Pydantic model (defensive programming)
+        evaluation = ensure_evaluation_model(evaluation)
+        
+        # evaluation is a CandidateEvaluation Pydantic model
         profiles_data["candidates"][str(candidate_id)] = {
             "candidate_id": candidate_id,
             "feature_scores": [
                 {
-                    "name": feature["name"],
-                    "weight": feature["weight"],
-                    "score": feature["score"]
+                    "name": feature.name,
+                    "weight": feature.weight,
+                    "score": feature.score
                 }
-                for feature in evaluation["feature_scores"]  # use dict access
+                for feature in evaluation.feature_scores
             ],
-            "affinity_score": evaluation["affinity_score"]
+            "affinity_score": evaluation.affinity_score
         }
     
     # Ensure output directory exists
@@ -95,19 +196,21 @@ def evaluate_all_candidates(
 
 
 def rank_candidates_by_affinity(
-    profiles_file: str = "data/candidate_profiles.json"
+    profiles_file: str = "data/candidate_profiles.json",
+    project_root: Optional[Path] = None
 ) -> List[Dict]:
     """
     Read candidate profiles from a JSON file and rank them by affinity score.
     
     Args:
         profiles_file: Path to the JSON file containing candidate profiles (relative to project root)
+        project_root: Optional project root path (defaults to auto-detected)
         
     Returns:
         List of candidate profiles sorted by affinity score (descending)
     """
-    # Get project root (parent of src directory)
-    project_root = Path(__file__).parent.parent
+    if project_root is None:
+        project_root = get_project_root()
     profiles_path = project_root / profiles_file
     
     if not profiles_path.exists():
@@ -160,7 +263,7 @@ def print_ranking(ranked_candidates: List[Dict], show_details: bool = False):
 
 
 if __name__ == "__main__":
-    # Example usage
+    # Example usage with manual requirements
     requirements = {
         "features": [
             {"name": "Machine Learning", "weight": 0.4},
@@ -171,25 +274,13 @@ if __name__ == "__main__":
     }
     
     # Get all candidate IDs from the data directory
-    project_root = Path(__file__).parent.parent
-    data_dir = project_root / "data"
-    candidate_ids = []
-    
-    if data_dir.exists():
-        for item in data_dir.iterdir():
-            if item.is_dir() and item.name.startswith("candidate_"):
-                try:
-                    candidate_id = int(item.name.split("_")[1])
-                    candidate_ids.append(candidate_id)
-                except (ValueError, IndexError):
-                    continue
-    
-    candidate_ids.sort()
-    print(f"Found {len(candidate_ids)} candidates: {candidate_ids}")
+    candidate_ids = get_candidate_ids()
     
     if not candidate_ids:
         print("❌ No candidates found in the data directory!")
-
+        sys.exit(1)
+    
+    print(f"Found {len(candidate_ids)} candidates: {candidate_ids}")
     
     # Evaluate all candidates
     print("\n" + "="*80)

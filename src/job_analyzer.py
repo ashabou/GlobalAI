@@ -11,7 +11,8 @@ import os
 import sys
 import json
 import re
-from typing import Dict, List
+from typing import Dict, List, Optional
+from pathlib import Path
 from dotenv import load_dotenv
 from google import genai
 import requests
@@ -48,6 +49,11 @@ FEATURES = [
     "Team Elevation",
     "Growth Hunger"
 ]
+
+
+def get_project_root() -> Path:
+    """Get the project root directory."""
+    return Path(__file__).parent.parent
 
 
 def scrape_job_description(url: str) -> str:
@@ -142,11 +148,13 @@ def extract_tech_skills(job_description: str) -> List[str]:
     Returns:
         List of technical skills/technologies
     """
-    prompt = f"""Analyze this job description and extract ALL technical skills, technologies,
-programming languages, frameworks, tools, and technical competencies mentioned.
+    prompt = f"""Analyze the following job description and extract all technical skills (technologies, programming languages, frameworks, tools, and other technical competencies) 
+    as well as soft skills relevant for performing well in this role.
 
-Return ONLY a JSON array of strings, no other text.
-Example: ["Python", "Machine Learning", "TensorFlow", "AWS", "SQL"]
+    Return only a JSON array of strings. Do not include any additional text, explanation, or formatting.
+
+    Example output:
+    ["Adaptability", "Creativity", "Python", "Machine Learning", "TensorFlow", "AWS", "SQL"]
 
 Job Description:
 {job_description}
@@ -308,6 +316,61 @@ def analyze_job_from_url(url: str) -> Dict:
     }
 
 
+def save_job_analysis(result: Dict, output_file: str = "data/job_analysis.json", 
+                      project_root: Optional[Path] = None) -> Path:
+    """
+    Save job analysis results to a JSON file.
+    
+    Args:
+        result: Job analysis result dictionary
+        output_file: Path to output file (relative to project root)
+        project_root: Optional project root path (defaults to auto-detected)
+        
+    Returns:
+        Path to the saved file
+    """
+    if project_root is None:
+        project_root = get_project_root()
+    output_path = project_root / output_file
+    
+    # Ensure output directory exists
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    with open(output_path, 'w') as f:
+        json.dump(result, f, indent=2)
+    
+    return output_path
+
+
+def load_job_analysis(input_file: str = "data/job_analysis.json",
+                      project_root: Optional[Path] = None) -> Dict:
+    """
+    Load job analysis results from a JSON file.
+    
+    Args:
+        input_file: Path to input file (relative to project root)
+        project_root: Optional project root path (defaults to auto-detected)
+        
+    Returns:
+        Job analysis result dictionary
+        
+    Raises:
+        FileNotFoundError: If the file doesn't exist
+    """
+    if project_root is None:
+        project_root = get_project_root()
+    input_path = project_root / input_file
+    
+    if not input_path.exists():
+        raise FileNotFoundError(
+            f"Job analysis file not found: {input_path}\n"
+            f"Please run job_analyzer.py first to generate the analysis."
+        )
+    
+    with open(input_path, 'r') as f:
+        return json.load(f)
+
+
 def display_results(result: Dict):
     """Display analysis results in a formatted way"""
     print()
@@ -411,11 +474,8 @@ Responsibilities:
     display_results(result)
 
     # Export JSON
-    output_file = "job_analysis.json"
-    with open(output_file, 'w') as f:
-        json.dump(result, f, indent=2)
-
-    print(f"Full results saved to: {output_file}")
+    output_path = save_job_analysis(result)
+    print(f"Full results saved to: {output_path}")
     print()
     print("=" * 60)
     print("Usage:")

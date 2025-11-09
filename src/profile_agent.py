@@ -1,5 +1,12 @@
+#!/usr/bin/env python3
+"""
+Profile Agent Module
+Evaluates individual candidates against job requirements using LLM.
+"""
+
 import os
 import json
+from pathlib import Path
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from typing import List
@@ -42,29 +49,48 @@ client = genai.Client(
     location=LOCATION
 )
 
-def evaluate_candidate(ID: int, requirements: dict) -> CandidateEvaluation:
-    folder = f"data/candidate_{ID}/"
-    cv_path = os.path.join(folder, f"cv_{ID}.pdf")
-    linkedin_path = os.path.join(folder, f"linkedin_post_{ID}.json")
+def get_project_root() -> Path:
+    """Get the project root directory."""
+    return Path(__file__).parent.parent
+
+
+def evaluate_candidate(ID: int, requirements: dict, project_root: Path = None) -> CandidateEvaluation:
+    """
+    Evaluate a single candidate against job requirements.
+    
+    Args:
+        ID: Candidate ID
+        requirements: Dictionary containing requirements with features and weights
+        project_root: Optional project root path (defaults to auto-detected)
+        
+    Returns:
+        CandidateEvaluation object with feature scores and affinity score
+    """
+    if project_root is None:
+        project_root = get_project_root()
+    
+    candidate_dir = project_root / "data" / f"candidate_{ID}"
+    cv_path = candidate_dir / f"cv_{ID}.pdf"
+    linkedin_path = candidate_dir / f"linkedin_post_{ID}.json"
 
     # --- Load CV text ---
     cv_text = ""
-    if os.path.exists(cv_path):
+    if cv_path.exists():
         with open(cv_path, "rb") as f:
             reader = PyPDF2.PdfReader(f)
             for page in reader.pages:
                 cv_text += page.extract_text() + "\n"
     else:
-        cv_text = "CV file not found."
+        cv_text = f"CV file not found at: {cv_path}"
 
     # --- Load LinkedIn JSON ---
     linkedin_text = ""
-    if os.path.exists(linkedin_path):
+    if linkedin_path.exists():
         with open(linkedin_path, "r") as f:
             linkedin_data = json.load(f)
         linkedin_text = json.dumps(linkedin_data, indent=2)
     else:
-        linkedin_text = "LinkedIn data file not found."
+        linkedin_text = f"LinkedIn data file not found at: {linkedin_path}"
 
     # --- Combine both sources ---
     combined_text = f"=== CV ===\n{cv_text}\n\n=== LinkedIn Data ===\n{linkedin_text}"
@@ -101,11 +127,49 @@ def evaluate_candidate(ID: int, requirements: dict) -> CandidateEvaluation:
     
     # --- Parse with Pydantic (handled automatically by client, available in .parsed) ---
     try:
-        # The genai client automatically parses the JSON response into the Pydantic model
-        result: CandidateEvaluation = response.parsed
+        # The genai client may return a dict or a Pydantic model
+        parsed_response = response.parsed
+        
+        # Convert to Pydantic model if it's a dict
+        if isinstance(parsed_response, dict):
+            # Convert dict to Pydantic model
+            result = CandidateEvaluation(**parsed_response)
+        elif isinstance(parsed_response, CandidateEvaluation):
+            # Already a Pydantic model
+            result = parsed_response
+        else:
+            # Try to parse from JSON text if parsed is not working
+            try:
+                json_text = response.text.strip()
+                # Remove markdown code blocks if present
+                if json_text.startswith('```json'):
+                    json_text = json_text.split('```json')[1].split('```')[0].strip()
+                elif json_text.startswith('```'):
+                    json_text = json_text.split('```')[1].split('```')[0].strip()
+                
+                parsed_dict = json.loads(json_text)
+                result = CandidateEvaluation(**parsed_dict)
+            except Exception as json_error:
+                print(f"Error parsing JSON from response text: {json_error}")
+                print(f"Raw response text: {response.text}")
+                raise
+                
     except Exception as e:
-        print("Error parsing LLM output, raw response text:", response.text)
-        raise
+        print(f"Error parsing LLM output: {e}")
+        print(f"Response type: {type(response.parsed)}")
+        print(f"Raw response text: {response.text}")
+        # Try fallback: parse from text
+        try:
+            json_text = response.text.strip()
+            if json_text.startswith('```json'):
+                json_text = json_text.split('```json')[1].split('```')[0].strip()
+            elif json_text.startswith('```'):
+                json_text = json_text.split('```')[1].split('```')[0].strip()
+            parsed_dict = json.loads(json_text)
+            result = CandidateEvaluation(**parsed_dict)
+        except Exception as fallback_error:
+            print(f"Fallback parsing also failed: {fallback_error}")
+            raise e
 
     return result
 
