@@ -37,7 +37,7 @@ candidates and organizations.
 
 ## Architecture at a Glance
 
-![Architecture Diagram](figure_scheme.pdf)
+![Architecture Diagram](figure_scheme.png)
 
 ## Repository Structure
 
