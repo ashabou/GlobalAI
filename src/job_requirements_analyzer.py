@@ -23,7 +23,7 @@ import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from google import genai
-import fastapi as FastAPI
+from fastapi import FastAPI
 from fastapi import HTTPException
 from pydantic import BaseModel
 
@@ -398,42 +398,45 @@ def display_results(result: Dict):
 # ---------------------------------------------------------------------------
 # FASTAPI ENDPOINT
 # ---------------------------------------------------------------------------
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class JobRequest(BaseModel):
     url: str
     company: str
     n: Optional[int] = 5
 
-
-@app.post("/analyze_job")
-def analyze_job_endpoint(req: JobRequest):
-    """
-    POST endpoint that receives:
-      {
-        "url": "https://...",
-        "company": "CompanyName",
-        "n": 5
-      }
-    and returns extracted features and weights.
-    """
+@app.post("/analyze_job/")
+def analyze_job_endpoint(req: JobRequest):  # Use Pydantic model, not Query params
     try:
-        return analyze_job_from_url(req.url, req.company, req.n)
+        print(f"Received request - URL: {req.url}, Company: {req.company}, N: {req.n}")
+        result = analyze_job_from_url(req.url, req.company, req.n)
+        print(f"Result: {result}")
+        return result
     except ValueError as e:
+        print(f"ValueError: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        print(f"Exception: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Feature extraction failed: {e}")
-
 
 # ---------------------------------------------------------------------------
 # RUN LOCAL (optional)
 # ---------------------------------------------------------------------------
 
-if __name__ == "__main__":
-    #import uvicorn
-    #uvicorn.run(app, host="0.0.0.0", port=8000)
-    url = "https://careers.lululemon.com/en_US/careers/JobDetail/Guest-Experience-Lead-Crossgates-Mall/55003"
-    company = "Lululemon"
-    n = 5
-    result = analyze_job_from_url(url, company, n)
-    display_results(result)
+# if __name__ == "__main__":
+#     #import uvicorn
+#     #uvicorn.run(app, host="0.0.0.0", port=8000)
+#     url = "https://careers.lululemon.com/en_US/careers/JobDetail/Guest-Experience-Lead-Crossgates-Mall/55003"
+#     company = "Lululemon"
+#     n = 5
+#     result = analyze_job_from_url(url, company, n)
+#     display_results(result)
 
