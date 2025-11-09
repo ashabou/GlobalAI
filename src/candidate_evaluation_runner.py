@@ -55,6 +55,7 @@ def run_candidate_evaluation(
     try:
         rel_job_path = job_path.relative_to(project_root)
         load_path = str(rel_job_path)
+        print("load_path: ", load_path)
     except ValueError:
         load_path = str(job_path)
 
@@ -85,6 +86,7 @@ def run_candidate_evaluation(
     try:
         output_rel = output_file.relative_to(project_root)
         output_rel_str = str(output_rel)
+        print("output_rel_str: ", output_rel_str)
     except ValueError:
         output_rel_str = str(output_file)
 

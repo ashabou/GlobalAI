@@ -146,7 +146,7 @@ def evaluate_all_candidates(
                 else:
                     print(f"   ⚠ No documents found in candidate directory")
             
-            evaluation = evaluate_candidate(candidate_id, requirements)
+            evaluation = evaluate_candidate(candidate_id, requirements,project_root=project_root)
             # Ensure evaluation is a Pydantic model (defensive programming)
             evaluation = ensure_evaluation_model(evaluation)
             all_profiles[candidate_id] = evaluation
