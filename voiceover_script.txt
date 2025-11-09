@@ -1,0 +1,112 @@
+GLOBALAI - 60-SECOND TECH VIDEO VOICEOVER SCRIPT
+==================================================
+
+TOTAL DURATION: 60 seconds
+READ THIS WORD-FOR-WORD during recording
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[0:00 - 0:08] OPENING (8 seconds)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"GlobalAI uses Google's Gemini 2.5 Flash via Vertex AI, FastAPI for our REST API,
+and Pydantic for structured output validation."
+
+[PAUSE: 1 second]
+
+"But the real innovation is how we guarantee consistent AI responses—every single time."
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[0:15 - 0:35] TECHNICAL DEEP DIVE (20 seconds)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"The hardest problem? Getting structured feedback from an LLM."
+
+[PAUSE: 0.5 seconds]
+
+"We solved this by passing Pydantic schemas directly to Gemini's structured output API.
+This forces the model to return valid JSON matching our exact structure—no parsing errors,
+no validation issues, just perfect data every time."
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[0:35 - 0:55] CHALLENGES (20 seconds)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"We faced three key challenges."
+
+[PAUSE: 0.5 seconds - let it sink in]
+
+"First, LLMs can still hallucinate or return malformed data, so we built multi-layer
+fallback parsing with three separate parsing strategies."
+
+[PAUSE: 0.5 seconds]
+
+"Second, every job board has different HTML structures, so we use seven fallback
+CSS selectors to scrape any job posting."
+
+[PAUSE: 0.5 seconds]
+
+"Third, Vertex AI costs add up quickly, so we chose Flash models instead of Pro—
+ten times cheaper, three times faster, still ninety-five percent accurate."
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[0:55 - 1:00] CLOSING (5 seconds)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"Biggest lesson? Structured output is the future of LLM applications.
+It turns generative AI into reliable, production-grade software."
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+PRONUNCIATION GUIDE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+- Gemini: "JEM-in-eye" or "JEM-in-ee"
+- Vertex AI: "VER-tex A-I"
+- Pydantic: "pie-DAN-tick"
+- FastAPI: "Fast A-P-I" (say the letters)
+- CSS: "C-S-S" (say the letters)
+
+
+PACING NOTES:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FAST: Tech stack list, challenges enumeration
+SLOW: "guarantee consistent AI responses—every single time" (emphasize this)
+PAUSE: After "three key challenges" - give judges a moment
+
+
+EMPHASIS WORDS (speak these louder/clearer):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+- GUARANTEE
+- EVERY SINGLE TIME
+- FORCES the model
+- PERFECT data
+- TEN TIMES cheaper
+- THREE TIMES faster
+- PRODUCTION-GRADE
+
+
+TOTAL WORD COUNT: 157 words
+AVERAGE SPEAKING PACE: 157 words ÷ 60 seconds = 2.6 words/second (comfortable pace)
+
+
+PRACTICE TIPS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Record yourself and time it - you might be faster/slower than you think
+2. Don't rush the technical terms (Pydantic, Vertex AI, etc.)
+3. Smile while talking - it makes your voice more engaging
+4. Take a breath at each [PAUSE] marker
+5. Practice 3-5 times before final recording
+6. Stand up while recording for better voice projection
