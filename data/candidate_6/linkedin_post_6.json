@@ -1,0 +1,105 @@
+{
+  "profile": {
+    "id": "lukas-weber",
+    "firstName": "Lukas",
+    "lastName": "Weber",
+    "headline": "Sports Science @ University of Munich | 400m Hurdler",
+    "location": null,
+    "followersCount": 285,
+    "profilePicture": null,
+    "occupation": "Sports Science student at University of Munich | Competitive Athlete",
+    "about": "Dedicated 400m hurdler passionate about sports performance, youth development, and pushing human potential.",
+    "linkedinUrl": "https://www.linkedin.com/in/lukas-weber",
+    "connectionsDegree": "1st"
+  },
+  "posts": [
+    {
+      "id": "post-1",
+      "author": {
+        "id": "lukas-weber",
+        "name": "Lukas Weber",
+        "headline": "Sports Science @ University of Munich | 400m Hurdler"
+      },
+      "content": {
+        "text": "Team Captain - This season has been a defining chapter in my athletic journey—one that taught me the true meaning of leadership and perseverance. Leading our university team alongside Maria Schmidt and Thomas Bauer showed me what authentic teamwork, resilience, and focused determination can achieve.\n\nI'm particularly grateful to Coach Werner Hofmann and Dr. Anna Berger, whose guidance in strategic training, mental preparation, and performance under pressure has been transformative.\n\nBeyond the medals and records, what truly mattered was the team spirit: lifting each other up, growing together, and transforming every setback into a stepping stone. These are lessons that extend far beyond the track.",
+        "media": [
+          {
+            "type": "image",
+            "altText": null,
+            "url": null
+          },
+          {
+            "type": "image",
+            "altText": null,
+            "url": null
+          }
+        ]
+      },
+      "timestamp": "2025-10-15T00:00:00Z",
+      "visibility": "PUBLIC",
+      "engagement": {
+        "reactions": {
+          "like": 2,
+          "celebrate": 3,
+          "love": 1
+        },
+        "totalReactions": 32,
+        "commentsCount": 4,
+        "sharesCount": 1
+      },
+      "linkedEntities": [
+        {
+          "type": "person",
+          "name": "Maria Schmidt",
+          "role": "Team co-captain"
+        },
+        {
+          "type": "person",
+          "name": "Thomas Bauer",
+          "role": "Team co-captain"
+        },
+        {
+          "type": "person",
+          "name": "Werner Hofmann",
+          "role": "Head Coach"
+        },
+        {
+          "type": "person",
+          "name": "Dr. Anna Berger",
+          "role": "Sports Psychologist"
+        }
+      ]
+    },
+    {
+      "id": "post-2",
+      "author": {
+        "id": "lukas-weber",
+        "name": "Lukas Weber",
+        "headline": "Sports Science @ University of Munich | 400m Hurdler"
+      },
+      "content": {
+        "text": "Thrilled to announce that I've been selected for the Elite Training Program at Bavarian State Sports Association! Excited to take my performance to the next level with this incredible opportunity.",
+        "media": []
+      },
+      "timestamp": "2025-09-20T00:00:00Z",
+      "visibility": "PUBLIC",
+      "engagement": {
+        "reactions": {
+          "like": 1,
+          "celebrate": 2,
+          "love": 1
+        },
+        "totalReactions": 28,
+        "commentsCount": 3,
+        "sharesCount": 0
+      },
+      "linkedEntities": [
+        {
+          "type": "organization",
+          "name": "Bavarian State Sports Association",
+          "role": "Training Organization"
+        }
+      ]
+    }
+  ]
+}
