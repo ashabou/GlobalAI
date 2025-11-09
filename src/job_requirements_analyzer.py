@@ -413,38 +413,6 @@ def display_results(result: Dict):
 
 
 # ---------------------------------------------------------------------------
-# FASTAPI ENDPOINT
-# ---------------------------------------------------------------------------
-from fastapi.middleware.cors import CORSMiddleware
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-class JobRequest(BaseModel):
-    url: str
-    company: str
-    n: Optional[int] = 5
-
-@app.post("/analyze_job/")
-def analyze_job_endpoint(req: JobRequest):  # Use Pydantic model, not Query params
-    try:
-        print(f"Received request - URL: {req.url}, Company: {req.company}, N: {req.n}")
-        result = analyze_job_from_url(req.url, req.company, req.n)
-        print(f"Result: {result}")
-        return result
-    except ValueError as e:
-        print(f"ValueError: {str(e)}")
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        print(f"Exception: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Feature extraction failed: {e}")
-
-# ---------------------------------------------------------------------------
 # RUN LOCAL (optional)
 # ---------------------------------------------------------------------------
 
