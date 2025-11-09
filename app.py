@@ -24,12 +24,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-@app.get("/health")
-def health_check() -> dict:
-    return {"status": "ok"}
-
-
 class AnalyzeJobRequest(BaseModel):
     url: str = Field(..., description="Job posting URL")
     company: str = Field(..., description="Company name")
@@ -86,25 +80,13 @@ class CandidateEvaluationRequest(BaseModel):
     )
 
 
-@app.post("/evaluate_candidates")
-def evaluate_candidates(request: CandidateEvaluationRequest) -> dict:
+@app.get("/evaluate_candidates")
+def evaluate_candidates(
+) -> dict:
     project_root = get_project_root()
-
-    def resolve(path_str: str) -> Path:
-        path = Path(path_str)
-        if not path.is_absolute():
-            path = project_root / path
-        return path
-
-    job_path = resolve(request.job_file)
-    output_dir = resolve(request.output_dir)
-
+    print(project_root)
     try:
         result = run_candidate_evaluation(
-            job_file=str(job_path),
-            candidate_ids=request.candidate_ids,
-            output_dir=str(output_dir),
-            show_details=request.show_details,
             project_root=project_root,
         )
         return result
