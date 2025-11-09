@@ -7,7 +7,7 @@ dist/
 wheels/
 *.egg-info
 .env
-data/*
+data/
 # Virtual environments
 .venv
 venv/
@@ -24,8 +24,6 @@ logs/
 .vscode
 hackathon_env/
 exec -l /
-.env
-data/
 
 # Python version files
 .python-version

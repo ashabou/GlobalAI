@@ -1,6 +1,6 @@
 # SkillSense – Unlock Your Hidden Potential
 
-> "The future of work is about skills, not job titles." — SkillSense helps you prove it.
+> "Refresh the market. Accepting the best, consulting the rest."
 
 ## Overview
 
