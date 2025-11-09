@@ -23,6 +23,8 @@ logs/
 .vscode
 hackathon_env/
 exec -l /
+.env
+data/
 
 # Python version files
 .python-version

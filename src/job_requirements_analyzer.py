@@ -42,7 +42,19 @@ client = genai.Client(
     project=PROJECT_ID,
     location=LOCATION
 )
+
+
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(title="Job Feature Extraction API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],            # or the specific Lovable origin
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/health")
@@ -420,6 +432,7 @@ def analyze_job_endpoint(req: JobRequest):
       }
     and returns extracted features and weights.
     """
+    print("Incoming /analyze_job request:", req.url)
     try:
         return analyze_job_from_url(req.url, req.company, req.n)
     except ValueError as e:
