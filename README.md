@@ -161,8 +161,8 @@ Saves the resulting question set under `data/questions/` (created from the unpac
 
 ## Future Directions
 
-- Integrate live skill validation (coding / project challenges) to augment the
-  generated profiles.
+- Integrate information sources (e.g. Google Scholar, blogs, etc.) to augment the
+  generated candidateprofiles.
 - Expand feedback to include recommended learning paths from external providers.
 - Attach question generator to Lovable workflows so recruiters can instantly prepare
   interviews.
