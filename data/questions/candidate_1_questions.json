@@ -1,0 +1,137 @@
+{
+  "candidate_id": 1,
+  "candidate_affinity_score": 0.41,
+  "generated_at": "2025-11-09T08:22:36.371875",
+  "questions": [
+    {
+      "question_text": "The 'Guest Experience' is central to Lululemon's philosophy. Can you describe what 'exceptional guest experience' means to you in a retail environment, specifically for a brand like Lululemon, and how you would ensure your team consistently delivers it?",
+      "question_type": "gap_probing",
+      "target_skill": "Guest Experience",
+      "difficulty_level": "hard",
+      "rationale": "The candidate scored 0.00 in Guest Experience, which is a critical skill for a 'Guest Experience Lead'. This question probes their fundamental understanding and practical application of the concept in a Lululemon context.",
+      "expected_signals": [
+        "Demonstrates understanding of Lululemon's specific guest-centric approach (e.g., connection, education, community).",
+        "Provides concrete examples of how to create exceptional moments.",
+        "Discusses strategies for coaching and empowering a team to deliver high standards.",
+        "Shows awareness of personalized service and building relationships."
+      ]
+    },
+    {
+      "question_text": "Lululemon is known for its innovative performance apparel. How do you approach learning about new products, their technical features, and their benefits, to effectively educate guests and make personalized recommendations?",
+      "question_type": "gap_probing",
+      "target_skill": "Product Knowledge (Lululemon)",
+      "difficulty_level": "medium",
+      "rationale": "With a 0.00 score in Product Knowledge, this question aims to understand the candidate's methodology for acquiring and utilizing product information, which is vital for authentic guest interaction at Lululemon.",
+      "expected_signals": [
+        "Describes a proactive learning process (e.g., reading materials, trying products, asking questions).",
+        "Explains how to translate technical features into guest benefits.",
+        "Mentions tailoring recommendations based on guest needs and activities.",
+        "Shows enthusiasm for the brand's products."
+      ]
+    },
+    {
+      "question_text": "As a Guest Experience Lead, you'd be responsible for more than just guest interactions. Can you describe your experience with key retail operational tasks such as inventory management, visual merchandising standards, or opening/closing procedures, and how you ensure efficiency in these areas?",
+      "question_type": "gap_probing",
+      "target_skill": "Retail Operations",
+      "difficulty_level": "medium",
+      "rationale": "The candidate scored 0.00 in Retail Operations. This question assesses their practical experience and understanding of the foundational operational aspects necessary for a lead role in a retail environment.",
+      "expected_signals": [
+        "Details specific operational tasks they've managed or been involved with.",
+        "Explains methods for maintaining standards and efficiency (e.g., checklists, delegation, training).",
+        "Connects operational efficiency to a positive guest experience.",
+        "Demonstrates problem-solving in operational contexts."
+      ]
+    },
+    {
+      "question_text": "Tell me about a time you had to motivate a team to achieve a challenging guest experience goal or overcome a difficult operational hurdle. What was your approach, and what was the outcome?",
+      "question_type": "behavioral",
+      "target_skill": "Leadership",
+      "difficulty_level": "medium",
+      "rationale": "The candidate has a strong Leadership score (0.80). This behavioral question allows them to demonstrate their leadership skills in a relevant retail context, focusing on motivation and problem-solving.",
+      "expected_signals": [
+        "Clearly outlines the challenge and the goal.",
+        "Describes specific leadership actions taken (e.g., communication, delegation, coaching, leading by example).",
+        "Articulates the positive impact on the team and the guest experience.",
+        "Reflects on lessons learned or improvements made."
+      ]
+    },
+    {
+      "question_text": "Describe a situation where unexpected changes in store traffic, staffing, or product availability required you to quickly adjust your plans or your team's approach to guest service. How did you handle it, and what did you learn?",
+      "question_type": "behavioral",
+      "target_skill": "Adaptability",
+      "difficulty_level": "medium",
+      "rationale": "With a high Adaptability score (0.90), this question probes how they apply this strength in dynamic retail scenarios, which are common in a Guest Experience Lead role.",
+      "expected_signals": [
+        "Identifies a clear situation requiring adaptation.",
+        "Explains the steps taken to adjust plans or team focus.",
+        "Demonstrates calm under pressure and effective decision-making.",
+        "Articulates a learning or insight gained from the experience."
+      ]
+    },
+    {
+      "question_text": "Imagine a scenario where a guest is highly dissatisfied, and your team member is struggling to de-escalate the situation. How would you step in, communicate with both the guest and your team member, and resolve the issue effectively?",
+      "question_type": "role_specific",
+      "target_skill": "Communication",
+      "difficulty_level": "medium",
+      "rationale": "The candidate has a perfect 1.00 score in Communication. This role-specific scenario tests their ability to apply strong communication skills in a high-stakes guest service situation, involving both conflict resolution and team coaching.",
+      "expected_signals": [
+        "Describes a structured approach to de-escalation (e.g., active listening, empathy, problem-solving).",
+        "Explains how they would support and coach the team member discreetly.",
+        "Focuses on finding a mutually agreeable solution for the guest.",
+        "Demonstrates clear, calm, and professional communication."
+      ]
+    },
+    {
+      "question_text": "Tell me about a time you had to collaborate with another department or team (e.g., visual merchandising, back-of-house) to improve the overall guest experience or achieve a store-wide objective. What was your role, and what was the result?",
+      "question_type": "behavioral",
+      "target_skill": "Collaboration",
+      "difficulty_level": "medium",
+      "rationale": "The candidate scored highly in Collaboration (0.90). This question explores their ability to work cross-functionally, which is important for a lead role in ensuring a seamless guest journey.",
+      "expected_signals": [
+        "Clearly defines the collaborative goal and the parties involved.",
+        "Describes their specific contributions and how they fostered teamwork.",
+        "Highlights the positive outcome of the collaboration on guest experience or store goals.",
+        "Shows an understanding of different team functions."
+      ]
+    },
+    {
+      "question_text": "As a Lead, you'll be responsible for coaching and developing your team. Describe your experience in providing feedback, both positive and constructive, to team members to improve their performance, particularly in guest interactions.",
+      "question_type": "gap_probing",
+      "target_skill": "Performance Management",
+      "difficulty_level": "medium",
+      "rationale": "With a low score (0.10) in Performance Management, this question aims to uncover any existing experience or understanding of coaching and feedback, which is a key responsibility for a lead.",
+      "expected_signals": [
+        "Provides examples of giving both positive reinforcement and constructive criticism.",
+        "Explains a structured approach to feedback (e.g., specific, timely, actionable).",
+        "Focuses on development and improvement rather than just criticism.",
+        "Demonstrates empathy and a supportive coaching style."
+      ]
+    },
+    {
+      "question_text": "While not a core sales role, understanding store performance metrics can inform guest experience strategies. How have you used sales data, guest feedback, or other metrics in previous roles to identify trends or areas for improvement in service or operations?",
+      "question_type": "gap_probing",
+      "target_skill": "Sales Data Analysis",
+      "difficulty_level": "medium",
+      "rationale": "The candidate scored 0.20 in Sales Data Analysis. This question probes their ability to connect data to actionable insights for improving guest experience and operational efficiency, even if they aren't directly analyzing complex datasets.",
+      "expected_signals": [
+        "Gives examples of specific metrics they've encountered (e.g., conversion rates, UPT, NPS, customer surveys).",
+        "Explains how they interpreted data to identify a problem or opportunity.",
+        "Describes actions taken based on data insights.",
+        "Shows an understanding of the 'why' behind the numbers."
+      ]
+    },
+    {
+      "question_text": "Have you had any involvement in the hiring process for new team members in previous roles? If so, what qualities do you look for when identifying candidates who would excel in delivering an exceptional guest experience?",
+      "question_type": "gap_probing",
+      "target_skill": "Hiring Process",
+      "difficulty_level": "easy",
+      "rationale": "The candidate scored 0.10 in Hiring Process. This question is designed to gauge any exposure they've had to hiring and their understanding of what makes a strong candidate for a guest-facing role, which is relevant for a lead.",
+      "expected_signals": [
+        "Describes specific involvement in hiring (e.g., interviewing, screening, onboarding).",
+        "Identifies key qualities like empathy, active listening, positive attitude, problem-solving.",
+        "Connects desired qualities directly to delivering an exceptional guest experience.",
+        "Shows an understanding of cultural fit for a brand like Lululemon."
+      ]
+    }
+  ]
+}

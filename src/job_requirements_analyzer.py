@@ -45,6 +45,11 @@ client = genai.Client(
 app = FastAPI(title="Job Feature Extraction API")
 
 
+@app.get("/health")
+def health_check() -> Dict[str, str]:
+    return {"status": "ok"}
+
+
 # ---------------------------------------------------------------------------
 # SCRAPER
 # ---------------------------------------------------------------------------
@@ -421,18 +426,4 @@ def analyze_job_endpoint(req: JobRequest):
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Feature extraction failed: {e}")
-
-
-# ---------------------------------------------------------------------------
-# RUN LOCAL (optional)
-# ---------------------------------------------------------------------------
-
-if __name__ == "__main__":
-    #import uvicorn
-    #uvicorn.run(app, host="0.0.0.0", port=8000)
-    url = "https://careers.lululemon.com/en_US/careers/JobDetail/Guest-Experience-Lead-Crossgates-Mall/55003"
-    company = "Lululemon"
-    n = 5
-    result = analyze_job_from_url(url, company, n)
-    display_results(result)
 

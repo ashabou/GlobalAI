@@ -4,21 +4,21 @@
   "features": [
     "Product Knowledge (Lululemon)",
     "Sales Data Analysis",
-    "Retail Operations",
-    "Hiring Process",
-    "Performance Management",
-    "Guest Experience",
+    "Store Operations",
+    "Retail Experience",
+    "POS Systems",
+    "Customer Connection",
     "Leadership",
     "Adaptability",
-    "Collaboration",
-    "Communication"
+    "Communication",
+    "Teamwork"
   ],
   "weights": [
     1.0,
-    0.6,
     0.7,
+    0.7,
+    0.6,
     0.4,
-    0.5,
     1.0,
     0.9,
     0.8,
@@ -40,14 +40,14 @@
   "url": "https://careers.lululemon.com/en_US/careers/JobDetail/Guest-Experience-Lead-Crossgates-Mall/55003",
   "weights_dict": {
     "Product Knowledge (Lululemon)": 1.0,
-    "Sales Data Analysis": 0.6,
-    "Retail Operations": 0.7,
-    "Hiring Process": 0.4,
-    "Performance Management": 0.5,
-    "Guest Experience": 1.0,
+    "Sales Data Analysis": 0.7,
+    "Store Operations": 0.7,
+    "Retail Experience": 0.6,
+    "POS Systems": 0.4,
+    "Customer Connection": 1.0,
     "Leadership": 0.9,
     "Adaptability": 0.8,
-    "Collaboration": 0.8,
-    "Communication": 0.7
+    "Communication": 0.8,
+    "Teamwork": 0.7
   }
 }
