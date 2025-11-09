@@ -23,6 +23,9 @@ import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from google import genai
+import fastapi as FastAPI
+from fastapi import HTTPException
+from pydantic import BaseModel
 
 # Load environment variables
 load_dotenv()
@@ -40,7 +43,7 @@ client = genai.Client(
     project=PROJECT_ID,
     location=LOCATION
 )
-# app = FastAPI(title="Job Feature Extraction API")
+app = FastAPI(title="Job Feature Extraction API")
 
 
 # ---------------------------------------------------------------------------
@@ -396,29 +399,29 @@ def display_results(result: Dict):
 # FASTAPI ENDPOINT
 # ---------------------------------------------------------------------------
 
-# class JobRequest(BaseModel):
-#     url: str
-#     company: str
-#     n: Optional[int] = 5
+class JobRequest(BaseModel):
+    url: str
+    company: str
+    n: Optional[int] = 5
 
 
-# @app.post("/analyze_job")
-# def analyze_job_endpoint(req: JobRequest):
-#     """
-#     POST endpoint that receives:
-#       {
-#         "url": "https://...",
-#         "company": "CompanyName",
-#         "n": 5
-#       }
-#     and returns extracted features and weights.
-#     """
-#     try:
-#         return analyze_job_from_url(req.url, req.company, req.n)
-#     except ValueError as e:
-#         raise HTTPException(status_code=400, detail=str(e))
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Feature extraction failed: {e}")
+@app.post("/analyze_job")
+def analyze_job_endpoint(req: JobRequest):
+    """
+    POST endpoint that receives:
+      {
+        "url": "https://...",
+        "company": "CompanyName",
+        "n": 5
+      }
+    and returns extracted features and weights.
+    """
+    try:
+        return analyze_job_from_url(req.url, req.company, req.n)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Feature extraction failed: {e}")
 
 
 # ---------------------------------------------------------------------------
