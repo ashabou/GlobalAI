@@ -14,6 +14,7 @@ if str(SRC_PATH) not in sys.path:
 from job_requirements_analyzer import analyze_job_from_url, get_project_root
 from candidate_evaluation_runner import run_candidate_evaluation
 from candidate_feedback_generator import generate_feedback_for_rejected_candidates
+from question_generation_runner import run_question_generation
 
 
 def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
@@ -53,6 +54,17 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
         "--hide-details",
         action="store_true",
         help="Hide detailed feature scores when printing rankings",
+    )
+    parser.add_argument(
+        "--top-k",
+        type=int,
+        default=3,
+        help="Number of top candidates to generate interview questions for (default: 3)",
+    )
+    parser.add_argument(
+        "--skip-questions",
+        action="store_true",
+        help="Skip interview question generation step",
     )
     return parser.parse_args(argv)
 
@@ -113,11 +125,30 @@ def main(argv: Optional[List[str]] = None) -> None:
         project_root=project_root,
     )
 
-    print("\nWorkflow complete.")
+    # Agent D: Interview Question Generation (optional)
+    interview_questions_path = output_dir / "interview_questions.json"
+    if not args.skip_questions:
+        print("\n" + "=" * 80)
+        print("AGENT D: Interview Question Generation")
+        print("=" * 80)
+        question_result = run_question_generation(
+            top_k=args.top_k,
+            evaluations_file=str(candidate_evaluations_path.relative_to(project_root)),
+            job_requirements_file=str(job_requirements_path.relative_to(project_root)),
+            output_file=str(interview_questions_path.relative_to(project_root)),
+            project_root=project_root,
+        )
+
+    print("\n" + "=" * 80)
+    print("WORKFLOW COMPLETE")
+    print("=" * 80)
     print(f"Job requirements saved to: {job_requirements_path}")
     print(f"Candidate evaluations saved to: {candidate_evaluations_path}")
     print(f"Feedback summary saved to: {feedback_summary_path}")
     print(f"Individual feedback stored in: {feedback_dir}")
+    if not args.skip_questions:
+        print(f"Interview questions saved to: {interview_questions_path}")
+    print("=" * 80)
 
 
 if __name__ == "__main__":
