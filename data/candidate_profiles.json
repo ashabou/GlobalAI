@@ -1,0 +1,132 @@
+{
+  "metadata": {
+    "evaluation_date": "2025-11-09T01:09:00.287220",
+    "total_candidates": 4,
+    "requirements": {
+      "features": [
+        {
+          "name": "Machine Learning",
+          "weight": 0.4
+        },
+        {
+          "name": "Python programming",
+          "weight": 0.3
+        },
+        {
+          "name": "Communication skills",
+          "weight": 0.2
+        },
+        {
+          "name": "Leadership",
+          "weight": 0.1
+        }
+      ]
+    }
+  },
+  "candidates": {
+    "1": {
+      "candidate_id": 1,
+      "feature_scores": [
+        {
+          "name": "Machine Learning",
+          "weight": 0.4,
+          "score": 1.0
+        },
+        {
+          "name": "Python programming",
+          "weight": 0.3,
+          "score": 1.0
+        },
+        {
+          "name": "Communication skills",
+          "weight": 0.2,
+          "score": 1.0
+        },
+        {
+          "name": "Leadership",
+          "weight": 0.1,
+          "score": 0.9
+        }
+      ],
+      "affinity_score": 0.99
+    },
+    "2": {
+      "candidate_id": 2,
+      "feature_scores": [
+        {
+          "name": "Machine Learning",
+          "weight": 0.4,
+          "score": 0.95
+        },
+        {
+          "name": "Python programming",
+          "weight": 0.3,
+          "score": 0.9
+        },
+        {
+          "name": "Communication skills",
+          "weight": 0.2,
+          "score": 0.95
+        },
+        {
+          "name": "Leadership",
+          "weight": 0.1,
+          "score": 0.9
+        }
+      ],
+      "affinity_score": 0.93
+    },
+    "3": {
+      "candidate_id": 3,
+      "feature_scores": [
+        {
+          "name": "Machine Learning",
+          "weight": 0.4,
+          "score": 1.0
+        },
+        {
+          "name": "Python programming",
+          "weight": 0.3,
+          "score": 1.0
+        },
+        {
+          "name": "Communication skills",
+          "weight": 0.2,
+          "score": 1.0
+        },
+        {
+          "name": "Leadership",
+          "weight": 0.1,
+          "score": 1.0
+        }
+      ],
+      "affinity_score": 1.0
+    },
+    "4": {
+      "candidate_id": 4,
+      "feature_scores": [
+        {
+          "name": "Machine Learning",
+          "weight": 0.4,
+          "score": 1.0
+        },
+        {
+          "name": "Python programming",
+          "weight": 0.3,
+          "score": 0.9
+        },
+        {
+          "name": "Communication skills",
+          "weight": 0.2,
+          "score": 1.0
+        },
+        {
+          "name": "Leadership",
+          "weight": 0.1,
+          "score": 1.0
+        }
+      ],
+      "affinity_score": 0.97
+    }
+  }
+}

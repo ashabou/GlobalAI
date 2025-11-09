@@ -21,6 +21,8 @@ hackathon_env/
 wandb/
 logs/
 .vscode
+hackathon_env/
+exec -l /
 
 # Python version files
 .python-version
