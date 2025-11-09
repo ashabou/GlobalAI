@@ -13,14 +13,6 @@ if str(SRC_PATH) not in sys.path:
 
 from job_requirements_analyzer import analyze_job_from_url, get_project_root
 from candidate_evaluation_runner import run_candidate_evaluation
-from candidate_feedback_generator import generate_feedback_for_candidate
-
-
-def _as_relative(path: Path, root: Path) -> str:
-    try:
-        return str(path.relative_to(root))
-    except ValueError:
-        return str(path)
 
 
 def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
@@ -60,6 +52,17 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
         "--hide-details",
         action="store_true",
         help="Hide detailed feature scores when printing rankings",
+    )
+    parser.add_argument(
+        "--top-k",
+        type=int,
+        default=3,
+        help="Number of top candidates to generate interview questions for (default: 3)",
+    )
+    parser.add_argument(
+        "--skip-questions",
+        action="store_true",
+        help="Skip interview question generation step",
     )
     return parser.parse_args(argv)
 
@@ -117,17 +120,6 @@ def main(argv: Optional[List[str]] = None) -> None:
         requirements_file=job_requirements_path,
         output_file=feedback_summary_path,
         feedback_dir=feedback_dir,
-        project_root=project_root,
-    )
-
-    individual_feedback_path = feedback_dir / f"candidate_{args.candidate_id}_feedback.json"
-
-    print("\nWorkflow complete.")
-    print(f"Job requirements saved to: {job_requirements_path}")
-    print(f"Candidate evaluations saved to: {candidate_evaluations_path}")
-    print(f"Feedback summary saved to: {feedback_summary_path}")
-    print(f"Individual feedback saved to: {individual_feedback_path}")
-
 
 if __name__ == "__main__":
     main()
