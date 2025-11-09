@@ -1,64 +1,31 @@
 #!/usr/bin/env python3
-"""Unified CLI for job analysis and candidate evaluation."""
+"""Run job analysis, candidate evaluation, and feedback generation."""
 
 import argparse
 import sys
 from pathlib import Path
-from typing import Optional, List
+from typing import List, Optional
 
-# Ensure src/ modules are importable when running from repo root
 PROJECT_ROOT = Path(__file__).resolve().parent
 SRC_PATH = PROJECT_ROOT / "src"
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
-from job_requirements_analyzer import (
-    analyze_job_from_url,
-    load_job_analysis,
-    display_results,
-    get_project_root,
-)
+from job_requirements_analyzer import analyze_job_from_url, get_project_root
 from candidate_evaluation_runner import run_candidate_evaluation
-
-
-def run_job_analysis(
-    job_url: str,
-    company: str,
-    n: int,
-    output_file: str,
-    project_root: Path,
-) -> dict:
-    """Run job analysis from URL and persist results."""
-    result = analyze_job_from_url(
-        url=job_url,
-        company=company,
-        n=n,
-        output_file=output_file,
-        project_root=project_root,
-    )
-    display_results(result)
-    saved_path = result.get("saved_path", output_file)
-    print(f"Job requirements saved to: {saved_path}")
-    return result
-
-
-def ensure_job_file(job_file: str, project_root: Path) -> Path:
-    job_path = Path(job_file)
-    if not job_path.is_absolute():
-        job_path = project_root / job_path
-    if not job_path.exists():
-        raise FileNotFoundError(
-            f"Job requirements file not found: {job_path}\n"
-            "Use --job-url/--company to generate it first."
-        )
-    return job_path
+from candidate_feedback_generator import generate_feedback_for_rejected_candidates
 
 
 def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="End-to-end recruitment workflow")
-    job_source = parser.add_mutually_exclusive_group()
-    job_source.add_argument("--job-url", help="URL of the job posting to analyze")
-    parser.add_argument("--company", help="Company name (required with --job-url)")
+    parser = argparse.ArgumentParser(
+        description="Run job analysis, candidate ranking, and feedback generation"
+    )
+    parser.add_argument("job_url", help="URL of the job posting to analyze")
+    parser.add_argument(
+        "--company",
+        required=True,
+        help="Company name associated with the job posting",
+    )
     parser.add_argument(
         "--n",
         type=int,
@@ -66,30 +33,26 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
         help="Number of technical/behavioral features to extract (default: 5)",
     )
     parser.add_argument(
-        "--job-file",
-        default="data/job_requirements.json",
-        help="Path to job requirements JSON (default: data/job_requirements.json)",
+        "--output-dir",
+        default="data",
+        help="Directory where outputs (requirements, evaluations, feedback) are stored",
+    )
+    parser.add_argument(
+        "--top-n",
+        type=int,
+        default=1,
+        help="Number of top-ranked candidates to exclude from feedback",
     )
     parser.add_argument(
         "--candidates",
         type=int,
         nargs="+",
-        help="Specific candidate IDs to evaluate (defaults to all discovered candidates)",
-    )
-    parser.add_argument(
-        "--output-dir",
-        default="data",
-        help="Directory to store candidate evaluation outputs (default: data)",
+        help="Specific candidate IDs to evaluate (defaults to all discovered)",
     )
     parser.add_argument(
         "--hide-details",
         action="store_true",
-        help="Hide detailed feature scores in ranking output",
-    )
-    parser.add_argument(
-        "--skip-evaluation",
-        action="store_true",
-        help="Only run job analysis, skip candidate evaluation",
+        help="Hide detailed feature scores when printing rankings",
     )
     return parser.parse_args(argv)
 
@@ -98,32 +61,63 @@ def main(argv: Optional[List[str]] = None) -> None:
     args = parse_args(argv)
     project_root = get_project_root()
 
-    job_file = args.job_file
-    if args.job_url:
-        if not args.company:
-            raise ValueError("--company is required when --job-url is provided")
-        run_job_analysis(
-            job_url=args.job_url,
-            company=args.company,
-            n=args.n,
-            output_file=job_file,
-            project_root=project_root,
-        )
-    else:
-        # If not generating, ensure file exists before continuing
-        ensure_job_file(job_file, project_root)
+    output_dir = (project_root / args.output_dir).resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    if args.skip_evaluation:
-        print("Candidate evaluation skipped by request.")
-        return
+    job_requirements_path = output_dir / "job_requirements.json"
+    candidate_evaluations_path = output_dir / "candidate_evaluations.json"
+    feedback_summary_path = output_dir / "candidate_feedback.json"
+    feedback_dir = output_dir / "feedback"
 
-    run_candidate_evaluation(
-        job_file=job_file,
+    print("=" * 80)
+    print("AGENT A: Job Requirements Analysis")
+    print("=" * 80)
+    job_result = analyze_job_from_url(
+        url=args.job_url,
+        company=args.company,
+        n=args.n,
+        output_file=str(job_requirements_path.relative_to(project_root)),
+        project_root=project_root,
+    )
+    saved_requirements = job_result.get("saved_path")
+    if saved_requirements:
+        job_requirements_path = Path(saved_requirements)
+        if not job_requirements_path.is_absolute():
+            job_requirements_path = project_root / job_requirements_path
+
+    print("\n" + "=" * 80)
+    print("AGENT B: Candidate Evaluation")
+    print("=" * 80)
+    evaluation_result = run_candidate_evaluation(
+        job_file=str(job_requirements_path.relative_to(project_root)),
         candidate_ids=args.candidates,
-        output_dir=args.output_dir,
+        output_dir=str(output_dir.relative_to(project_root)),
         show_details=not args.hide_details,
         project_root=project_root,
     )
+
+    print("\n" + "=" * 80)
+    print("AGENT C: Feedback Generation")
+    print("=" * 80)
+    eval_file = Path(evaluation_result["output_file"])
+    if not eval_file.is_absolute():
+        eval_file = project_root / eval_file
+    candidate_evaluations_path = eval_file
+
+    generate_feedback_for_rejected_candidates(
+        top_n=args.top_n,
+        evaluations_file=eval_file,
+        requirements_file=job_requirements_path,
+        output_summary_file=feedback_summary_path,
+        feedback_dir=feedback_dir,
+        project_root=project_root,
+    )
+
+    print("\nWorkflow complete.")
+    print(f"Job requirements saved to: {job_requirements_path}")
+    print(f"Candidate evaluations saved to: {candidate_evaluations_path}")
+    print(f"Feedback summary saved to: {feedback_summary_path}")
+    print(f"Individual feedback stored in: {feedback_dir}")
 
 
 if __name__ == "__main__":
